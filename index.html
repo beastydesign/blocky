@@ -1,0 +1,1214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blocky Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300..600&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap">
+<style>
+/* Tirage bleu de nuit, tout en mono. Scène fixe sur 5,6 écrans : le cube flotte, puis s'éclate ; fiche à droite. */
+:root {
+  color-scheme: dark;
+  --night: #061634;
+  --bp: #0c2f6a;
+  --bp-deep: #0a2756;
+  --halo: #1d58b0;
+  --panel: rgba(6, 22, 52, .78);
+  --line: #eaf3ff;
+  --line-2: rgba(234, 243, 255, .62);
+  --line-3: rgba(234, 243, 255, .22);
+  --grid-1: rgba(214, 232, 255, .045);
+  --grid-2: rgba(214, 232, 255, .1);
+  --accent: #ffb04a;
+  --ok: #8fe6b8;
+  --pix: #ffffff;
+  --shell-lo: #08244d; --shell-hi: #5a8ddc;
+  --glass-lo: #031230; --glass-hi: #2c5ba8;
+  --plate-lo: #0b2d63; --plate-hi: #80acef;
+  --pcb-lo: #07304a; --pcb-hi: #4ea9c9;
+  --metal-lo: #21437a; --metal-hi: #d6e5fb;
+  --chip-lo: #04122c; --chip-hi: #2a4b82;
+  --cu-lo: #0b4270; --cu-hi: #9ae6ff;
+  --batt-lo: #183a6e; --batt-hi: #b3cbf1;
+  --lcd-lo: #04142f; --lcd-hi: #2d5496;
+  --foam-lo: #23406f; --foam-hi: #8fa9d3;
+  --f-display: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --f-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--night); color: var(--line); }
+body { font-family: var(--f-mono); font-size: 14px; line-height: 1.6; letter-spacing: .005em; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--accent); color: var(--night); }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+.blueprint {
+  background-color: var(--bp);
+  background-image:
+    radial-gradient(ellipse 70% 60% at 50% 46%, color-mix(in srgb, var(--halo) 55%, transparent), transparent 70%),
+    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 40%, var(--night) 100%),
+    linear-gradient(var(--grid-2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-2) 1px, transparent 1px),
+    linear-gradient(var(--grid-1) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-1) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  background-position: center;
+}
+.eyebrow { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--line-2); }
+
+/* ---------- scène ---------- */
+.scrolly { height: 560vh; position: relative; }
+.stage { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) 380px; }
+.draw { position: relative; min-width: 0; overflow: hidden; }
+.draw svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+#scene { filter: drop-shadow(0 0 2.5px rgba(150, 210, 255, .45)); }
+.wordmark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-family: var(--f-display); font-variation-settings: "wdth" 112.5; font-weight: 200; font-size: clamp(52px, 10.5vw, 200px); line-height: 1; letter-spacing: -.04em; color: transparent; -webkit-text-stroke: 1px rgba(234, 243, 255, .2); white-space: nowrap; pointer-events: none; user-select: none; }
+.wordmark span { font-size: .32em; -webkit-text-stroke: 1px var(--accent); vertical-align: top; margin-left: .08em; letter-spacing: 0; }
+.grain { position: absolute; inset: -50%; pointer-events: none; opacity: .09; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); animation: grain 1.2s steps(6) infinite; }
+@keyframes grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); } 60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); } }
+.frame { position: absolute; inset: 14px; border: 1px solid var(--line-3); pointer-events: none; }
+.frame::before, .frame::after { content: ""; position: absolute; width: 14px; height: 14px; border: 1px solid var(--line); }
+.frame::before { left: -1px; top: -1px; border-width: 1px 0 0 1px; }
+.frame::after { right: -1px; bottom: -1px; border-width: 0 1px 1px 0; }
+
+.hud { position: absolute; left: 36px; top: 34px; max-width: 460px; pointer-events: none; display: grid; gap: 16px; }
+.idx { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--line-2); display: flex; gap: 14px; align-items: center; }
+.idx i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+.phase { display: grid; grid-template-columns: auto 1fr; gap: 0 18px; align-items: start; }
+.phase .k { font-family: var(--f-display); font-variation-settings: "wdth" 112.5; font-weight: 100; font-size: 64px; line-height: .9; color: var(--accent); }
+.phase .t { display: block; font-family: var(--f-display); font-variation-settings: "wdth" 100; font-weight: 400; font-size: 20px; letter-spacing: -.01em; line-height: 1.2; margin-top: 4px; }
+.phase .d { display: block; color: var(--line-2); font-size: 13px; max-width: 36ch; margin-top: 6px; }
+
+.readout { position: absolute; right: 30px; top: 30px; display: grid; gap: 0; border: 1px solid var(--line-3); font-size: 10.5px; pointer-events: none; background: color-mix(in srgb, var(--night) 50%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.readout div { display: flex; justify-content: space-between; gap: 22px; padding: 5px 10px; border-top: 1px solid var(--line-3); }
+.readout div:first-child { border-top: 0; }
+.readout span { color: var(--line-2); letter-spacing: .14em; text-transform: uppercase; }
+.readout b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.readout b.ok { color: var(--ok); }
+
+.cartouche { position: absolute; right: 30px; bottom: 30px; font-size: 10px; border: 1px solid var(--line-2); display: grid; grid-template-columns: auto auto; pointer-events: none; background: color-mix(in srgb, var(--night) 55%, transparent); }
+.cartouche span { padding: 3px 9px; border-bottom: 1px solid var(--line-3); color: var(--line-2); letter-spacing: .12em; text-transform: uppercase; }
+.cartouche b { padding: 3px 9px; border-bottom: 1px solid var(--line-3); border-left: 1px solid var(--line-3); font-weight: 500; }
+.cartouche span:nth-last-child(2), .cartouche b:last-child { border-bottom: 0; }
+
+.ruler { position: absolute; left: 36px; bottom: 30px; width: min(320px, 40%); pointer-events: none; }
+.ruler .bar { height: 6px; border: 1px solid var(--line-2); position: relative; background: repeating-linear-gradient(90deg, var(--line-3) 0 1px, transparent 1px 10%); }
+.ruler .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.ruler .lbl { display: flex; justify-content: space-between; font-size: 10px; color: var(--line-2); margin-top: 6px; letter-spacing: .16em; text-transform: uppercase; }
+
+.hint { position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); font-size: 10.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--line-2); display: grid; justify-items: center; gap: 8px; pointer-events: none; transition: opacity .4s; }
+.hint i { width: 1px; height: 30px; background: linear-gradient(var(--line), transparent); animation: drop 1.8s ease-in-out infinite; }
+@keyframes drop { 0% { transform: scaleY(.15); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 100% { transform: scaleY(.15); transform-origin: bottom; } }
+
+.xh { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s; }
+.xh.on { opacity: 1; }
+.xh .xv, .xh .xhh { position: absolute; background: var(--line-3); }
+.xh .xv { left: var(--x); top: 0; bottom: 0; width: 1px; }
+.xh .xhh { top: var(--y); left: 0; right: 0; height: 1px; }
+.xh b { position: absolute; left: calc(var(--x) + 12px); top: calc(var(--y) + 10px); font-weight: 400; font-size: 10.5px; letter-spacing: .08em; color: var(--line); background: color-mix(in srgb, var(--night) 70%, transparent); padding: 2px 6px; border: 1px solid var(--line-3); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) { .grain, .hint i, .idx i, .ticker .track { animation: none; } }
+
+/* svg */
+#scene .e { stroke: var(--line-2); stroke-width: .9; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+#scene .m { stroke-width: .35; stroke-linejoin: round; }
+#scene .t { fill: none; stroke: var(--line-3); stroke-width: .8; vector-effect: non-scaling-stroke; }
+#scene .cable { fill: none; stroke: var(--line); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+#scene .cable2 { fill: none; stroke: var(--bp); stroke-width: 1; stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; }
+#scene .part { cursor: crosshair; }
+#scene.focus .part:not(.on) { opacity: .16; }
+#scene .part.on .e { stroke: var(--accent); stroke-width: 1.4; }
+#scene .part.on .cable { stroke: var(--accent); }
+#over text { font-family: var(--f-mono); fill: var(--line); paint-order: stroke; stroke: var(--night); stroke-linejoin: round; }
+#over .dl { stroke: var(--accent); fill: none; vector-effect: non-scaling-stroke; stroke-width: 1; }
+#over .dx { stroke: var(--accent); fill: none; vector-effect: non-scaling-stroke; stroke-width: .7; stroke-dasharray: 3 3; }
+#over .dt { fill: var(--accent); font-weight: 500; }
+#over .ld { stroke: var(--line-2); fill: none; vector-effect: non-scaling-stroke; stroke-width: .8; }
+#over .bl { fill: var(--night); stroke: var(--line); vector-effect: non-scaling-stroke; stroke-width: 1; }
+#over .bal { cursor: pointer; }
+#over .bal.on .bl { stroke: var(--accent); fill: var(--accent); }
+#over .bal.on .bn { fill: var(--night); stroke: none; }
+#over .bal.on .bt { fill: var(--accent); }
+
+/* ---------- fiche ---------- */
+.panel { background: var(--panel); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-left: 1px solid var(--line-3); overflow-y: auto; padding: 30px 26px 34px; min-width: 0; }
+.panel h2 { font-family: var(--f-display); font-variation-settings: "wdth" 100; font-weight: 300; font-size: 26px; line-height: 1.12; letter-spacing: -.02em; margin: 8px 0 8px; text-wrap: balance; }
+.plist { list-style: none; margin: 18px 0 0; padding: 0; display: grid; counter-reset: p; }
+.plist button { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: 34px 1fr; gap: 2px 10px; padding: 11px 0; border-bottom: 1px solid var(--line-3); cursor: pointer; transition: color .15s, padding .2s; }
+.plist button:hover, .plist button:focus-visible { color: var(--accent); padding-left: 6px; }
+.plist .no { font-size: 11px; color: var(--line-2); padding-top: 2px; }
+.plist .nm { font-size: 14px; }
+.plist .rf { grid-column: 2; font-size: 11px; color: var(--line-2); }
+.back { all: unset; cursor: pointer; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--line-2); }
+.back:hover { color: var(--accent); }
+.tag { display: inline-block; font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; padding: 1px 8px; border: 1px solid currentColor; border-radius: 99px; }
+.tag.std { color: var(--ok); }
+.tag.mes { color: var(--accent); }
+.big { font-size: 12px; color: var(--line-2); margin: 6px 0 0; }
+.ref { font-size: 13px; color: var(--line); border: 1px solid var(--line-3); border-left: 2px solid var(--accent); padding: 8px 10px; margin: 16px 0 0; word-break: break-word; }
+.dims { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 16px 0 0; border: 1px solid var(--line-3); }
+.dims div { padding: 9px 10px; border-left: 1px solid var(--line-3); }
+.dims div:first-child { border-left: 0; }
+.dims small { display: block; font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--line-2); }
+.dims b { font-family: var(--f-display); font-variation-settings: "wdth" 87.5; font-weight: 300; font-size: 22px; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.3; }
+.specs { margin: 18px 0 0; display: grid; }
+.specs div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line-3); font-size: 12.5px; }
+.specs dt { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--line-2); padding-top: 2px; }
+.specs dd { margin: 0; }
+.links { display: grid; gap: 8px; margin: 20px 0 0; }
+.links a { display: flex; justify-content: space-between; gap: 10px; text-decoration: none; border: 1px solid var(--accent); padding: 10px 12px; font-size: 12px; transition: background .15s, color .15s; }
+.links a:hover { background: var(--accent); color: var(--night); }
+.note { margin: 18px 0 0; font-size: 12px; color: var(--line-2); border-left: 1px solid var(--accent); padding-left: 12px; }
+
+@media (max-width: 860px) {
+  .stage { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+  .panel { border-left: 0; border-top: 1px solid var(--line-3); max-height: 38vh; padding: 18px 18px 22px; }
+  .panel h2 { font-size: 21px; }
+  .hud { left: 24px; top: 24px; right: 24px; }
+  .phase .k { font-size: 42px; }
+  .phase .d { display: none; }
+  .readout, .cartouche { display: none; }
+  .ruler, .hint, .wordmark { display: none; }
+  .idx { font-size: 9.5px; }
+}
+
+
+/* ---------- rendu 3D ---------- */
+.r3d { height: 460vh; position: relative; background: #050608; }
+.r3d-stage { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; height: 100dvh; overflow: hidden; background: radial-gradient(ellipse 60% 55% at 50% 42%, #1b1f27 0%, #0b0d11 55%, #040506 100%); }
+.r3d-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: pan-y; }
+.r3d-stage canvas:active { cursor: grabbing; }
+.r3d-hud { position: absolute; left: 36px; top: 34px; max-width: 440px; pointer-events: none; display: grid; gap: 16px; }
+.r3d-tip { position: absolute; pointer-events: none; font-size: 11px; letter-spacing: .06em; color: var(--line); background: rgba(5, 6, 8, .78); border: 1px solid rgba(234, 243, 255, .2); padding: 6px 9px; white-space: nowrap; opacity: 0; transition: opacity .15s; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.r3d-tip b { color: var(--accent); font-weight: 500; margin-right: 8px; }
+.r3d-ruler { position: absolute; left: 36px; bottom: 30px; width: min(320px, 40%); pointer-events: none; }
+.r3d-ruler .bar { height: 6px; border: 1px solid var(--line-2); position: relative; }
+.r3d-ruler .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.r3d-ruler .lbl { display: flex; justify-content: space-between; font-size: 10px; color: var(--line-2); margin-top: 6px; letter-spacing: .16em; text-transform: uppercase; }
+.r3d-legend { position: absolute; right: 30px; bottom: 30px; font-size: 10.5px; color: var(--line-2); letter-spacing: .12em; text-transform: uppercase; text-align: right; pointer-events: none; }
+@media (max-width: 860px) { .r3d-hud { left: 24px; top: 24px; right: 24px; } .r3d-ruler { left: 24px; width: calc(100% - 48px); } .r3d-legend { display: none; } }
+/* ---------- après la scène ---------- */
+.ticker { overflow: hidden; border-block: 1px solid var(--line-3); background: var(--night); padding-block: 14px; }
+.ticker .track { display: flex; width: max-content; animation: tick 60s linear infinite; }
+.ticker span { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--line-2); padding-inline: 28px; white-space: nowrap; }
+.ticker span::before { content: "◆"; color: var(--accent); margin-right: 28px; font-size: 8px; vertical-align: 2px; }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+.after { padding-inline: 20px; padding-block: 90px 110px; }
+.after .in { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 90px; }
+.after .in > *, .cols > * { min-width: 0; }
+.after h2 { font-family: var(--f-display); font-variation-settings: "wdth" 100; font-weight: 300; font-size: clamp(26px, 3.4vw, 40px); letter-spacing: -.02em; line-height: 1.1; margin: 10px 0 14px; text-wrap: balance; }
+.after .lede { color: var(--line-2); max-width: 64ch; margin: 0; }
+.after p { margin: 12px 0 0; max-width: 64ch; }
+.after h3 { font-family: var(--f-display); font-weight: 400; font-size: 15px; margin: 22px 0 0; }
+
+.hero2 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; align-items: end; }
+.hero2 > div { min-width: 0; }
+.cube3 { font-family: var(--f-display); font-variation-settings: "wdth" 112.5; font-weight: 100; font-size: clamp(34px, 11vw, 168px); line-height: .9; letter-spacing: -.05em; margin: 0; }
+.cube3 em { font-style: normal; color: var(--accent); font-weight: 200; }
+.figs { display: grid; gap: 0; border-top: 1px solid var(--line-3); }
+.figs div { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--line-3); }
+.figs span { color: var(--line-2); font-size: 12px; }
+.figs b { font-family: var(--f-display); font-variation-settings: "wdth" 87.5; font-weight: 200; font-size: 34px; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.figs b small { font-size: 14px; color: var(--line-2); margin-left: 4px; }
+@media (max-width: 860px) { .hero2 { grid-template-columns: 1fr; } }
+
+.tbl { overflow-x: auto; border-top: 1px solid var(--line-2); margin-top: 24px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 680px; }
+th { text-align: left; font-weight: 400; font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--line-2); padding: 12px 12px 12px 0; border-bottom: 1px solid var(--line-3); }
+td { padding: 13px 12px 13px 0; border-bottom: 1px solid var(--line-3); vertical-align: top; }
+tbody tr { transition: background .15s; }
+tbody tr:hover { background: rgba(234, 243, 255, .04); }
+td.n { color: var(--accent); white-space: nowrap; }
+td.d { white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.r { color: var(--line-2); }
+td a { white-space: nowrap; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; }
+@media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+ol.checks { margin: 18px 0 0; padding: 0; list-style: none; counter-reset: c; display: grid; }
+ol.checks li { counter-increment: c; position: relative; padding: 14px 0 14px 48px; border-top: 1px solid var(--line-3); color: var(--line-2); }
+ol.checks li::before { content: counter(c, decimal-leading-zero); position: absolute; left: 0; top: 15px; color: var(--accent); font-size: 12px; }
+ol.checks b { font-weight: 500; color: var(--line); }
+.mono { font-family: var(--f-mono); }
+.sources { margin: 18px 0 0; padding: 0; list-style: none; columns: 2 300px; column-gap: 40px; font-size: 12.5px; }
+.sources li { break-inside: avoid; padding: 7px 0; border-bottom: 1px solid var(--line-3); }
+.sources a { text-decoration: none; }
+.sources a:hover { text-decoration: underline; }
+footer.end { padding: 70px 20px 60px; text-align: center; border-top: 1px solid var(--line-3); background: var(--night); overflow: hidden; }
+footer.end .wm { font-family: var(--f-display); font-variation-settings: "wdth" 112.5; font-weight: 100; font-size: clamp(54px, 15vw, 230px); line-height: 1; letter-spacing: -.05em; color: transparent; -webkit-text-stroke: 1px rgba(234, 243, 255, .28); white-space: nowrap; }
+footer.end p { color: var(--line-2); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; margin: 22px 0 0; }
+</style>
+
+</head>
+<body>
+<div class="scrolly" id="scrolly">
+  <div class="stage">
+    <div class="draw blueprint" id="draw">
+      <div class="wordmark" id="wordmark" aria-hidden="true">BLOCKY</div>
+      <svg id="svg" role="img" aria-label="Vue éclatée du Blocky qui s'ouvre au scroll">
+        <defs>
+          <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="0.9" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="shade"><stop offset="0" stop-color="#020a1d" stop-opacity=".9"/><stop offset=".6" stop-color="#020a1d" stop-opacity=".35"/><stop offset="1" stop-color="#020a1d" stop-opacity="0"/></radialGradient>
+        </defs>
+        <g id="shadow"></g>
+        <g id="float"><g id="scene"></g><g id="over"></g></g>
+      </svg>
+      <div class="xh" id="xh" aria-hidden="true"><i class="xv"></i><i class="xhh"></i><b id="xhl"></b></div>
+      <div class="grain" aria-hidden="true"></div>
+      <div class="frame"></div>
+      <div class="hud">
+        <div class="idx"><i></i>Blocky · Module de paiement sans contact</div>
+        <div class="phase" id="phase"><span class="k">01</span><div><span class="t">Un cube noir</span><span class="d">41 × 41 × 41 mm.</span></div></div>
+      </div>
+      <div class="readout" aria-hidden="true">
+        <div><span>Éclatement</span><b id="ro-ex">000 %</b></div>
+        <div><span>Vue</span><b id="ro-cam">θ 31° · φ 9°</b></div>
+        <div><span>Pièces</span><b>11</b></div>
+        <div><span>Collisions</span><b class="ok">0</b></div>
+      </div>
+      <div class="hint" id="hint"><span>Faire défiler</span><i></i></div>
+      <div class="ruler" aria-hidden="true">
+        <div class="bar"><div class="fill" id="fill"></div></div>
+        <div class="lbl"><span>Monté</span><span>Éclaté</span></div>
+      </div>
+      <div class="cartouche" aria-hidden="true">
+        <span>Projet</span><b>Blocky</b>
+        <span>Dessin</span><b>Vue éclatée</b>
+        <span>Unités</span><b>mm</b>
+        <span>Rév.</span><b>B · 01.10.2026</b>
+      </div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+</div>
+
+
+<section class="r3d" id="r3d" aria-label="Rendu 3D du Blocky">
+  <div class="r3d-stage" id="r3dStage">
+    <canvas id="gl"></canvas>
+    <div class="r3d-hud">
+      <div class="idx"><i></i>Blocky · rendu 3D</div>
+      <div class="phase"><span class="k">3D</span><div><span class="t">Comme en vrai</span><span class="d">Faites défiler pour ouvrir le cube, glissez pour le tourner. Survolez une pièce pour son nom et ses cotes.</span></div></div>
+    </div>
+    <div class="r3d-tip" id="tip3"></div>
+    <div class="r3d-ruler" aria-hidden="true"><div class="bar"><div class="fill" id="fill3"></div></div><div class="lbl"><span>Monté</span><span>Éclaté</span></div></div>
+    <div class="r3d-legend" aria-hidden="true">ABS noir mat · verre trempé · OLED · cuivre</div>
+  </div>
+</section>
+<div class="ticker" aria-hidden="true"><div class="track">
+<span>41 × 41 × 41 mm</span><span>ABS noir mat · angles R8</span><span>Écran carré bord à bord · 33,6 mm</span><span>Bord noir 1,6 mm</span><span>Antenne NFC derrière l'écran</span><span>ST25R3916B · EMVCo 3.1a</span><span>ESP32-S3 · WiFi + BLE 5.0</span><span>USB-C · charge 100 mA</span><span>LiPo 500 mAh</span><span>11 pièces · 0 collision</span><span>41 × 41 × 41 mm</span><span>ABS noir mat · angles R8</span><span>Écran carré bord à bord · 33,6 mm</span><span>Bord noir 1,6 mm</span><span>Antenne NFC derrière l'écran</span><span>ST25R3916B · EMVCo 3.1a</span><span>ESP32-S3 · WiFi + BLE 5.0</span><span>USB-C · charge 100 mA</span><span>LiPo 500 mAh</span><span>11 pièces · 0 collision</span>
+</div></div>
+<main class="after blueprint">
+  <div class="in">
+
+    <section class="hero2">
+      <div>
+        <div class="eyebrow">Tout tient dedans</div>
+        <p class="cube3">41<em>×</em>41<em>×</em>41</p>
+      </div>
+      <div class="figs">
+        <div><span>Image carrée, bord à bord</span><b>33,6<small>mm</small></b></div>
+        <div><span>Bord noir visible autour</span><b>1,6<small>mm</small></b></div>
+        <div><span>Bouche USB-C / surface</span><b>1,17<small>mm</small></b></div>
+        <div><span>Volume libre derrière la batterie</span><b>21,3<small>mm</small></b></div>
+      </div>
+    </section>
+    <section>
+      <div class="eyebrow">Nomenclature · 11 pièces</div>
+      <h2>Chaque pièce, sa référence, ses cotes</h2>
+      <p class="lede">Les pièces du catalogue s'achètent telles quelles. Les pièces sur mesure se fabriquent d'après les cotes ci-dessous et le <a href="plan.html">plan technique</a> (coupe, face avant, dessous).</p>
+      <div class="tbl"><table>
+        <thead><tr><th>#</th><th>Pièce</th><th>Type</th><th>Référence</th><th>L × H × É (mm)</th><th>Lien</th></tr></thead>
+        <tbody id="bom"></tbody>
+      </table></div>
+      <p class="lede" style="margin-top:14px">Banc d'essai : la carte ST <a href="https://www.st.com/en/evaluation-tools/x-nucleo-nfc08a1.html">X-NUCLEO-NFC08A1</a> (ST25R3916B et antenne déjà accordée) branchée à la XIAO et à l'écran, pour écrire le logiciel pendant la fabrication de l'antenne sur mesure.</p>
+    </section>
+
+    <section class="cols">
+      <div>
+        <div class="eyebrow">Avant l'outillage</div>
+        <h2>Points à valider</h2>
+        <ol class="checks">
+          <li><b>Dalle sur mesure.</b> Envoyer le cahier des charges de l'écran (fiche n° 05) à des fabricants de dalles OLED : faisabilité de la nappe repliée, liaison SPI 3,3 V, outillage, minimum de commande, délai.</li>
+          <li><b>Portée NFC à travers l'écran.</b> Mesurer dès le prototype avec une dalle sans métal au dos, vitre en place. Objectif : 4 cm. Solution de repli : antenne sur la face arrière.</li>
+          <li><b>Écran du prototype.</b> Relever sur le datasheet ER-TFT1.54-1 la position de la zone active, les broches et la longueur de la nappe, pour la vitre et la coque du prototype.</li>
+          
+          <li><b>Port USB-C.</b> Calé sur le modèle 3D officiel de la XIAO : centre à 6,9 mm de la face avant, bouche à 1,17 mm de la surface. À vérifier sur une coque imprimée avec un vrai câble.</li>
+          <li><b>Autonomie.</b> Mesurer la consommation réelle. Il reste 37 × 37 × 21 mm libres derrière la batterie pour une batterie plus épaisse.</li>
+        </ol>
+      </div>
+      <div>
+        <div class="eyebrow">Encaissement</div>
+        <h2>Deux voies</h2>
+        <h3>A. Lien de paiement, tout de suite</h3>
+        <p>Le cube affiche un QR code et transmet le même lien au téléphone par NFC. Le client paie chez Stripe ou SumUp. Le cube ne voit jamais de numéro de carte : pas de certification bancaire.</p>
+        <h3>B. Lecture directe des cartes</h3>
+        <p>Le ST25R3916B est déjà conforme EMVCo 3.1a pour la partie radio. Il faut en plus un logiciel de paiement certifié (noyau EMV L2) et une certification de sécurité PCI. Plusieurs mois avec un laboratoire agréé.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Version de série</div>
+      <h2>Révision C</h2>
+      <p>Une fois le prototype validé, la XIAO est remplacée par ses composants soudés sur la carte mère : <span class="mono">Espressif ESP32-S3-MINI-1-N8</span> (15,4 × 20,5 × 2,4 mm), prise USB-C <span class="mono">GCT USB4105-GF-A</span> (USB 2.0, 16 contacts), chargeur <span class="mono">Microchip MCP73831T-2ACI/OT</span> (SOT-23-5, jusqu'à 500 mA). Le reste ne change pas.</p>
+    </section>
+
+    <section>
+      <div class="eyebrow">Sources</div>
+      <ul class="sources">
+        <li><a href="https://www.buydisplay.com/1-54-inch-tft-lcd-display-ips-panel-screen-240x240-for-smart-watch">BuyDisplay ER-TFT1.54-1</a></li>
+        <li><a href="https://goldenmorninglcd.com/tft-display/1.54-inch-240x240-st7789t3-gmt154-02/">Golden Morning GMT154-02</a></li>
+        <li><a href="https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/">Seeed XIAO ESP32S3 (wiki)</a></li>
+        <li><a href="https://botland.store/esp32-wifi-and-bt-modules/22878-seeed-xiao-esp32-s3-wifibluetooth-seeedstudio-113991114.html">XIAO ESP32S3 113991114 (Botland)</a></li>
+        <li><a href="https://www.st.com/en/nfc/st25r3916b.html">ST ST25R3916B</a></li>
+        <li><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/ST25R3916B-AQWT/16516567">ST25R3916B-AQWT (DigiKey)</a></li>
+        <li><a href="https://blog.st.com/st25r3916b/">ST25R3916B et EMVCo 3.1a (blog ST)</a></li>
+        <li><a href="https://www.st.com/en/evaluation-tools/x-nucleo-nfc08a1.html">ST X-NUCLEO-NFC08A1</a></li>
+        <li><a href="https://www.adafruit.com/product/1578">Adafruit 1578</a></li>
+        <li><a href="https://www.we-online.com/en/components/products/WE-FSFS">Würth WE-FSFS</a></li>
+        <li><a href="https://us.rs-online.com/product/wurth-elektronik/364004/70996260/">Würth 364004 (RS)</a></li>
+      </ul>
+    </section>
+  </div>
+</main>
+<footer class="end"><div class="wm" aria-hidden="true">BLOCKY</div><p>Blocky · Révision C · 01.10.2026 · <a href="plan.html">Plan technique</a></p></footer>
+
+<script>
+(function () {
+  /* ---------------- données ---------------- */
+  const BUY = "https://www.buydisplay.com/1-54-inch-tft-lcd-display-ips-panel-screen-240x240-for-smart-watch";
+  const PARTS = [
+    { id: "glass", n: 1, name: "Vitre de façade", kind: "mes", ref: "Verre trempé 1,0 mm · sérigraphie noire",
+      dims: [37, 37, 1], c: [0, 0, 20], ez: 112, delay: 0, lab: ["d", 0],
+      specs: [["Matière", "Verre trempé 1,0 mm (prototype : PMMA 1 mm découpé laser)"], ["Coins", "R6, concentriques aux angles R8 de la coque"], ["Fenêtre", "33,8 × 33,8, coins R4,5, centrée : bord noir visible de 1,6 mm"], ["Masque", "Sérigraphie noire sur le pourtour"], ["Montage", "L'écran y est collé en usine (lamination optique) ; l'ensemble se colle par l'avant dans le logement de la coque"]],
+      links: [] },
+    { id: "antenna", n: 2, name: "Antenne NFC + ferrite", kind: "mes", ref: "Circuit souple 4 spires derrière l'écran · ferrite Würth 364004",
+      dims: [35, 35, 0.3], c: [0, 0, 17.95], ez: -40, delay: .06, lab: ["u", 0],
+      specs: [["Position", "Juste derrière l'écran : le champ traverse la dalle, qui ne doit pas avoir de métal au dos"], ["Forme", "Anneau 35 × 35 extérieur (coins R5), 31 × 31 intérieur (coins R3)"], ["Circuit", "Souple 2 couches 0,11 mm, 4 spires"], ["Ferrite", "Würth 364004 (WE-FSFS 60 × 60 × 0,1) découpée en cadre, côté carte mère"], ["Accord", "Réseau d'accord recopié de la carte ST X-NUCLEO-NFC08A1, accord automatique du ST25R3916B"]],
+      note: "Point à valider en premier : la portée à travers l'écran, objectif 4 cm. Solution de repli : antenne sur la face arrière.",
+      links: [["Ferrite Würth 364004 (RS)", "https://us.rs-online.com/product/wurth-elektronik/364004/70996260/"], ["Gamme Würth WE-FSFS", "https://www.we-online.com/en/components/products/WE-FSFS"], ["Référence d'accord ST X-NUCLEO-NFC08A1", "https://www.st.com/en/evaluation-tools/x-nucleo-nfc08a1.html"]] },
+    { id: "shell", n: 3, name: "Coque avant", kind: "mes", ref: "ABS noir mat · injection",
+      dims: [41, 41, 36], c: [0, 0, 2.5], ez: 0, delay: 0, lab: ["d", 0],
+      specs: [["Matière", "ABS noir mat (prototype : SLA ou MJF)"], ["Parois", "2,0 mm"], ["Angles", "R8 vus de face, comme une GoPro ; arête avant R1,5 autour de la vitre (le rebord de 2 mm ne permet pas plus)"], ["Joint", "Plan de joint à 36 mm de l'avant avec la coque arrière"], ["Logement vitre", "37,2 × 37,2 × 1,0, coins R6,1"], ["Ouverture écran", "35,6 × 35,6, coins R5,2, encoche de 12,4 en haut pour la nappe repliée"], ["Bossages", "4 bossages Ø4,5 à ±14 mm avec inserts laiton M2"], ["Dessous", "Lumière USB-C 9,6 × 3,6 centrée, à 6,9 mm de la face avant ; paroi amincie à 1,0 sur 13 × 7"]],
+      links: [] },
+    { id: "lanyard", n: 4, name: "Dragonne", kind: "mes", ref: "Câble inox 7×7 Ø1,5 gainé nylon",
+      dims: [8, 37, 1.5], c: [0, 39, 0], ez: 0, delay: 0, parent: "shell", lab: ["u", 0],
+      specs: [["Câble", "Inox 7×7 Ø1,5, gaine nylon noire"], ["Passage", "2 trous Ø1,8 sur le dessus, entraxe 8"], ["Butées", "2 manchons aluminium sertis à l'intérieur"], ["Boucle", "37 mm au-dessus du cube"]],
+      links: [] },
+    { id: "lcd", n: 5, name: "Écran bord à bord", kind: "mes", ref: "Dalle OLED carrée sur mesure · image 33,6 mm",
+      dims: [35.2, 35.2, 1.4], vis: [33.6, 33.6], vc: [0, 0], c: [0, 0, 18.8], ez: 70, delay: .03, lab: ["u", 0],
+      specs: [["Technologie", "AMOLED, nappe repliée derrière la dalle côté haut"], ["Image", "Carrée 33,6 × 33,6 aux coins arrondis R4,3, centrée sur la face du cube"], ["Encombrement", "35,2 × 35,2 × 1,4 maximum, coins R5 ; bords de 0,8"], ["Nappe", "12 mm de large au milieu du bord haut, repliée derrière : dépasse de 0,7 mm"], ["Définition", "240 × 240 minimum, comme le prototype ; 400 × 400 conseillé"], ["Liaison", "SPI 4 fils (avec broche D/C) en 3,3 V, comme le prototype : avec le NFC et la mesure de batterie, la XIAO utilise 9 broches sur 11. Le QSPI demanderait 13 broches : seulement possible en version série (ESP32-S3-MINI-1)"], ["Alimentation", "Alimentation OLED (ELVDD / ELVSS) intégrée à la nappe : une seule entrée 3,3 V"], ["Dos", "Sans feuille métallique : l'antenne NFC est juste derrière"], ["Vitre", "Collée en usine sur la vitre 37 × 37 × 1,0"], ["Luminosité", "400 cd/m² minimum, −20 à +70 °C"]],
+      note: "Aucun écran carré de cette taille n'existe en catalogue : cette dalle se commande sur mesure (outillage et minimum de commande à chiffrer avec le fabricant). Le prototype se fait avec l'écran IPS 1,54\" BuyDisplay ER-TFT1.54-1 : même définition 240 × 240, image de 27,72 mm.",
+      links: [["Écran du prototype : ER-TFT1.54-1", BUY]] },
+    { id: "chassis", n: 6, name: "Châssis", kind: "mes", ref: "PC/ABS 1,2 mm",
+      dims: [36.6, 35.2, 1.2], c: [0, -0.7, 17.1], ez: -80, delay: .09, lab: ["d", 0],
+      specs: [["Rôle", "Plaque l'antenne contre l'écran et l'écran contre la vitre"], ["Matière", "PC/ABS 1,2 mm"], ["Passage", "Arrêté 1,6 mm sous le haut de la coque : la nappe de l'écran et la queue d'antenne passent au-dessus"], ["Jeu", "1,29 mm avec la XIAO, 0,1 mm avec l'antenne"], ["Coins", "R5,8 en bas, R4,4 en haut"]],
+      links: [] },
+    { id: "pcb", n: 7, name: "Carte mère", kind: "mes", ref: "FR4 4 couches 1,6 mm",
+      dims: [35, 35.5, 1.6], c: [0, -0.25, 10.1], ez: -125, delay: .12, lab: ["u", 0],
+      specs: [["Format", "35 × 35,5, 4 couches, 1,6 mm, coins R5 / R5,3 pour suivre les angles de la coque"], ["Face avant", "XIAO centrée en bas, connecteur ZIF de l'écran en haut, ST25R3916B avec son quartz 27,12 MHz et son circuit d'accord à droite, connecteur d'antenne en haut à droite"], ["Face arrière", "2 pastilles BAT+ / BAT− en haut, où les fils de la batterie sont soudés"], ["Fabrication", "JLCPCB ou PCBWay, avec pose des composants"]],
+      links: [["Fabrication de circuits (JLCPCB)", "https://jlcpcb.com"]] },
+    { id: "xiao", n: 8, name: "XIAO ESP32S3 + USB-C", kind: "std", ref: "Seeed Studio 113991114",
+      dims: [17.78, 20.95, 4.21], c: [0, -7.325, 13.105], ez: 0, delay: 0, parent: "pcb", lab: ["d", -1],
+      specs: [["Puce", "ESP32-S3, 8 Mo de PSRAM, 8 Mo de flash"], ["Radio", "WiFi 2,4 GHz, Bluetooth Low Energy 5.0"], ["Taille", "20,95 × 17,78 × 4,21 avec l'USB-C (mesuré sur le modèle 3D officiel Seeed)"], ["USB-C", "Dépasse de 1,53 mm du bord de la carte. Centré sous le cube, bouche à 1,17 mm de la surface"], ["Charge", "100 mA rapide, 0,9 mA d'entretien"], ["Veille", "14 µA en sommeil profond"], ["Montage", "Soudée à plat par ses bords crénelés"]],
+      links: [["Wiki Seeed (brochage, STEP)", "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/"], ["Acheter (Botland)", "https://botland.store/esp32-wifi-and-bt-modules/22878-seeed-xiao-esp32-s3-wifibluetooth-seeedstudio-113991114.html"]] },
+    { id: "st25", n: 9, name: "Lecteur NFC", kind: "std", ref: "ST ST25R3916B-AQWT",
+      dims: [5, 5, 1], c: [13, -1, 11.4], ez: 0, delay: 0, parent: "pcb", lab: ["d", 1],
+      specs: [["Boîtier", "VFQFPN-32, 5 × 5 × 1,0 mm"], ["Alimentation", "2,4 à 5,5 V (−20 à +105 °C), directement sur la batterie"], ["E/S", "1,65 à 5,5 V, ici en 3,3 V"], ["Normes", "ISO 14443 A/B, ISO 15693, FeliCa"], ["Paiement", "Conforme EMVCo 3.1a analogique et numérique"], ["Émulation", "Carte NFC-A (106 kbit/s) et FeliCa"], ["Horloge", "Quartz 27,12 MHz externe"], ["Liaison", "SPI jusqu'à 10 Mbit/s, partagé avec l'écran"]],
+      links: [["Page produit ST", "https://www.st.com/en/nfc/st25r3916b.html"], ["Datasheet DS13541", "https://www.st.com/resource/en/datasheet/st25r3916b.pdf"], ["Acheter (DigiKey)", "https://www.digikey.com/en/products/detail/stmicroelectronics/ST25R3916B-AQWT/16516567"]] },
+    { id: "battery", n: 10, name: "Batterie LiPo", kind: "std", ref: "LP603030 · 500 mAh · lipobattery.us",
+      dims: [30, 31, 6], c: [0, -1, 5.8], ez: -170, delay: .15, lab: ["d", 0],
+      specs: [["Type", "LiPo 3,7 V, 500 mAh, 1,85 Wh"], ["Cotes max", "30,0 × 31,0 × 6,0"], ["Protection", "Circuit de protection intégré, thermistance 10 kΩ en option"], ["Fils", "2 fils de 20 mm, soudés sur la carte mère"], ["Charge", "250 mA max ; la XIAO charge à 100 mA"], ["Logement", "4 mm de marge au-dessus pour les fils, 21 mm libres derrière"], ["Commande", "À partir de 5 pièces"]],
+      note: "La fiche ne dit pas si les 31 mm incluent le circuit de protection. Même avec 3 mm de plus, la batterie loge encore dans le cube : à confirmer sur le datasheet du fabricant.",
+      links: [["Fiche produit LP603030", "https://www.lipobattery.us/lipo-battery-lp603030-3-7v-500mah-1-85wh-with-protection-circuit-and-wires-20mm/"]] },
+    { id: "cover", n: 11, name: "Coque arrière", kind: "mes", ref: "ABS noir · 4 vis M2 × 8",
+      dims: [41, 41, 5], c: [0, 0, -18], ez: -215, delay: .18, lab: ["u", 0],
+      specs: [["Matière", "ABS noir mat"], ["Forme", "Coque de 5 mm, angles R8 vus de face, arête arrière R4, fond 2,0"], ["Joint", "Plan de joint à 36 mm de l'avant"], ["Fixation", "4 vis M2 × 8 tête fraisée dans les inserts laiton M2 de la coque avant"]],
+      links: [] }
+  ];
+  const byId = Object.fromEntries(PARTS.map(p => [p.id, p]));
+  window.BLOCKY_PARTS = PARTS;
+  const ORDER = ["cover", "battery", "pcb", "xiao", "st25", "chassis", "antenna", "shell", "lanyard", "lcd", "glass"];
+  const EYE = ["..XXXX..", ".XXXXXX.", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX.."];
+  const EYE_SHUT = ["........", "........", "........", "........", ".XXXXXX.", "........", "........", "........"];
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let BLINK = false, LOOK = 0;
+
+  /* ---------------- maths ---------------- */
+  const DEG = Math.PI / 180;
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const nrm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+  const LIGHT = nrm([0.35, 0.85, 0.55]);
+  const mm = v => String(Math.round(v * 100) / 100).replace(".", ",");
+
+  let B;
+  function camera(th, ph) {
+    th *= DEG; ph *= DEG;
+    B = { R: [Math.cos(th), 0, -Math.sin(th)], U: [-Math.sin(th) * Math.sin(ph), Math.cos(ph), -Math.cos(th) * Math.sin(ph)], W: [Math.sin(th) * Math.cos(ph), Math.sin(ph), Math.cos(th) * Math.cos(ph)] };
+  }
+  const P = p => [dot(p, B.R), -dot(p, B.U)];
+  const fp = q => q[0].toFixed(2) + "," + q[1].toFixed(2);
+  const pts = arr => arr.map(P).map(fp).join(" ");
+
+  /* ---------------- primitives ---------------- */
+  let buf;
+  const tone = (t, n) => `color-mix(in srgb, var(--${t}-hi) ${Math.round((0.16 + 0.84 * Math.max(0, dot(n, LIGHT))) * 100)}%, var(--${t}-lo))`;
+  function quad(q, n, t) {
+    if (dot(n, B.W) <= 0.002) return;
+    buf.push(`<polygon class="e" points="${pts(q)}" style="fill:${tone(t, n)}"/>`);
+  }
+  function box(c, s, t, skipFront) {
+    const [cx, cy, cz] = c, hx = s[0] / 2, hy = s[1] / 2, hz = s[2] / 2;
+    const v = (a, b, d) => [cx + a * hx, cy + b * hy, cz + d * hz];
+    quad([v(1, -1, -1), v(1, 1, -1), v(1, 1, 1), v(1, -1, 1)], [1, 0, 0], t);
+    quad([v(-1, -1, 1), v(-1, 1, 1), v(-1, 1, -1), v(-1, -1, -1)], [-1, 0, 0], t);
+    quad([v(-1, 1, -1), v(-1, 1, 1), v(1, 1, 1), v(1, 1, -1)], [0, 1, 0], t);
+    quad([v(-1, -1, 1), v(-1, -1, -1), v(1, -1, -1), v(1, -1, 1)], [0, -1, 0], t);
+    quad([v(1, -1, -1), v(-1, -1, -1), v(-1, 1, -1), v(1, 1, -1)], [0, 0, -1], t);
+    if (!skipFront) quad([v(-1, -1, 1), v(1, -1, 1), v(1, 1, 1), v(-1, 1, 1)], [0, 0, 1], t);
+  }
+  const rz = (cx, cy, z, w, h) => [[cx - w / 2, cy - h / 2, z], [cx + w / 2, cy - h / 2, z], [cx + w / 2, cy + h / 2, z], [cx - w / 2, cy + h / 2, z]];
+  function rectZ(cx, cy, z, w, h, style, cls = "e") {
+    if (B.W[2] <= 0) return;
+    buf.push(`<polygon class="${cls}" points="${pts(rz(cx, cy, z, w, h))}" style="${style}"/>`);
+  }
+  function ringZ(z, ow, oh, iw, ih, style, icx = 0, icy = 0) {
+    if (B.W[2] <= 0) return;
+    const o = rz(0, 0, z, ow, oh).map(P), i = rz(icx, icy, z, iw, ih).map(P);
+    const d = "M" + o.map(fp).join("L") + "Z M" + i.map(fp).join("L") + "Z";
+    buf.push(`<path class="e" fill-rule="evenodd" d="${d}" style="${style}"/>`);
+  }
+
+  // Contour arrondi (vu de face), sens trigonométrique. r = [bas-g, bas-d, haut-g, haut-d].
+  function rrBox(x0, x1, y0, y1, r, seg = 5) {
+    const q = Array.isArray(r) ? r : [r, r, r, r], out = [];
+    const arc = (cx, cy, rad, a0) => { for (let k = 0; k <= seg; k++) { const a = a0 + Math.PI / 2 * k / seg; out.push([cx + rad * Math.cos(a), cy + rad * Math.sin(a)]); } };
+    arc(x1 - q[1], y0 + q[1], q[1], -Math.PI / 2);
+    arc(x1 - q[3], y1 - q[3], q[3], 0);
+    arc(x0 + q[2], y1 - q[2], q[2], Math.PI / 2);
+    arc(x0 + q[0], y0 + q[0], q[0], Math.PI);
+    return out;
+  }
+  const rrSq = (h, r, seg) => rrBox(-h, h, -h, h, r, seg);
+  // Contour carré arrondi avec ses normales, pour les surfaces raccordées (congés).
+  function rrN(h, r, seg = 6) {
+    const out = [], c = h - r;
+    [[c, -c, -Math.PI / 2], [c, c, 0], [-c, c, Math.PI / 2], [-c, -c, Math.PI]].forEach(([cx, cy, a0]) => {
+      for (let k = 0; k <= seg; k++) { const a = a0 + Math.PI / 2 * k / seg; out.push({ p: [cx + r * Math.cos(a), cy + r * Math.sin(a)], n: [Math.cos(a), Math.sin(a)] }); }
+    });
+    return out;
+  }
+  // Surface raccordée : anneaux [retrait, z, angle de la normale hors du plan].
+  function loft(base, rings, t, inward) {
+    for (let j = 0; j < rings.length - 1; j++) {
+      const [d0, z0, f0] = rings[j], [d1, z1, f1] = rings[j + 1], fm = (f0 + f1) / 2;
+      for (let i = 0; i < base.length; i++) {
+        const A = base[i], C = base[(i + 1) % base.length];
+        const at = (V, d, z) => [V.p[0] - V.n[0] * d, V.p[1] - V.n[1] * d, z];
+        const q = [at(A, d0, z0), at(C, d0, z0), at(C, d1, z1), at(A, d1, z1)];
+        const nx = (A.n[0] + C.n[0]) / 2, ny = (A.n[1] + C.n[1]) / 2;
+        let n = nrm([nx * Math.cos(fm), ny * Math.cos(fm), Math.sin(fm)]);
+        if (inward) n = [-n[0], -n[1], -n[2]];
+        if (dot(n, B.W) <= 0) continue;
+        const st = tone(t, n);
+        buf.push(`<polygon class="m" points="${pts(q)}" style="fill:${st};stroke:${st}"/>`);
+      }
+    }
+  }
+  function prism(o, z0, z1, t, noFront) {
+    for (let i = 0; i < o.length; i++) {
+      const a = o[i], b = o[(i + 1) % o.length];
+      const n = nrm([b[1] - a[1], -(b[0] - a[0]), 0]);
+      if (dot(n, B.W) <= 0) continue;
+      const st = tone(t, n);
+      buf.push(`<polygon class="m" points="${pts([[a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z1], [a[0], a[1], z1]])}" style="fill:${st};stroke:${st}"/>`);
+    }
+    if (!noFront && B.W[2] > 0) buf.push(`<polygon class="e" points="${pts(o.map(p => [p[0], p[1], z1]))}" style="fill:${tone(t, [0, 0, 1])}"/>`);
+  }
+  function holeWall(o, z0, z1, t) {
+    for (let i = 0; i < o.length; i++) {
+      const a = o[i], b = o[(i + 1) % o.length];
+      const n = nrm([-(b[1] - a[1]), b[0] - a[0], 0]);
+      if (dot(n, B.W) <= 0) continue;
+      buf.push(`<polygon class="m" points="${pts([[a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z1], [a[0], a[1], z1]])}" style="fill:${tone(t, n)};stroke:${tone(t, n)}"/>`);
+    }
+  }
+  function capZ(z, outer, holes, style) {
+    if (B.W[2] <= 0) return;
+    let d = "M" + outer.map(p => fp(P([p[0], p[1], z]))).join("L") + "Z";
+    holes.forEach(h => d += " M" + h.map(p => fp(P([p[0], p[1], z]))).join("L") + "Z");
+    buf.push(`<path class="e" fill-rule="evenodd" d="${d}" style="${style}"/>`);
+  }
+  const R_FACE = 8, F_FRONT = 1.5, F_BACK = 4;
+  const fillet = (r, zEdge, sign, steps = 4) => Array.from({ length: steps + 1 }, (_, k) => {
+    const f = Math.PI / 2 * k / steps;
+    return [r * (1 - Math.cos(f)), zEdge - sign * r + sign * r * Math.sin(f), sign * f];
+  });
+
+  // Boîte aux arêtes arrondies, maillée ; la face avant plate est confiée à frontHook.
+  function rbox(c, s, r, t, frontHook) {
+    const h = s.map(v => v / 2 - r), seg = 3;
+    const co = i => { const H = h[i], a = []; for (let k = 0; k <= seg; k++) a.push(-(H + r) + r * k / seg); a.push(H); for (let k = 1; k <= seg; k++) a.push(H + r * k / seg); return a; };
+    const C = [co(0), co(1), co(2)];
+    const map = p => {
+      const q = [clamp(p[0], -h[0], h[0]), clamp(p[1], -h[1], h[1]), clamp(p[2], -h[2], h[2])];
+      const d = sub(p, q), l = Math.hypot(d[0], d[1], d[2]) || 1;
+      return [c[0] + q[0] + d[0] / l * r, c[1] + q[1] + d[1] / l * r, c[2] + q[2] + d[2] / l * r];
+    };
+    const flats = [];
+    for (let a = 0; a < 3; a++) for (const sg of [-1, 1]) {
+      const b = (a + 1) % 3, e = (a + 2) % 3, cb = C[b], ce = C[e];
+      for (let i = 0; i < cb.length - 1; i++) for (let j = 0; j < ce.length - 1; j++) {
+        const mk = (u, v) => { const p = [0, 0, 0]; p[a] = sg * (h[a] + r); p[b] = u; p[e] = v; return map(p); };
+        const q = [mk(cb[i], ce[j]), mk(cb[i + 1], ce[j]), mk(cb[i + 1], ce[j + 1]), mk(cb[i], ce[j + 1])];
+        let n = cross(sub(q[2], q[0]), sub(q[3], q[1]));
+        if (Math.hypot(n[0], n[1], n[2]) < 1e-9) continue;
+        n = nrm(n);
+        const cen = [(q[0][0] + q[2][0]) / 2, (q[0][1] + q[2][1]) / 2, (q[0][2] + q[2][2]) / 2];
+        if (dot(n, sub(cen, c)) < 0) n = [-n[0], -n[1], -n[2]];
+        if (dot(n, B.W) <= 0) continue;
+        const center = i === seg && j === seg;
+        if (center && a === 2 && sg === 1 && frontHook) { frontHook(q); continue; }
+        const st = tone(t, n);
+        buf.push(`<polygon class="m" points="${pts(q)}" style="fill:${st};stroke:${st}"/>`);
+        if (center) flats.push(q);
+      }
+    }
+    flats.forEach(q => buf.push(`<polygon class="t" points="${pts(q)}"/>`));
+  }
+
+  /* ---------------- géométrie de chaque pièce ---------------- */
+  const GEO = {
+    cover(z) {
+      const zB = z - 2.5, zP = z + 2.5, base = rrN(20.5, R_FACE);
+      loft(base, [...fillet(F_BACK, zB, -1).reverse(), [0, zP, 0]], "shell");
+      capZ(zB + 2, rrSq(18.5, 6), [], "fill:var(--shell-lo)");
+      [[-14, -14], [14, -14], [-14, 14], [14, 14]].forEach(([x, y]) => prism(rrBox(x - 2.25, x + 2.25, y - 2.25, y + 2.25, 2.25, 3), zB + 2, zP, "shell"));
+      capZ(zP, rrSq(20.5, R_FACE), [rrSq(18.5, 6)], `fill:${tone("shell", [0, 0, 1])}`);
+    },
+    battery(z) {
+      box([0, 0, z], [29, 36, 4.75], "batt");
+      rectZ(0, -2, z + 2.39, 19, 13, `fill:var(--batt-lo);fill-opacity:.55`);
+      box([-3, 18.8, z], [1.2, 1.6, 1.2], "chip"); box([3, 18.8, z], [1.2, 1.6, 1.2], "chip");
+    },
+    pcb(z) {
+      prism(rrBox(-17.5, 17.5, -18, 17.5, [5.3, 5.3, 5, 5]), z - 0.8, z + 0.8, "pcb");
+      const f = z + 0.8;
+      box([0, 13.5, f + 0.6], [12, 4, 1.2], "chip");
+      box([11, 15.5, f + 0.7], [4, 2.5, 1.4], "chip");
+      box([13, 3.5, f + 0.4], [3.2, 2.5, 0.8], "metal");
+      [[10.5, 6.5], [12, 6.5], [13.5, 6.5], [15, 6.5], [10.5, 9], [12, 9], [13.5, 9], [15, 9]].forEach(([x, y]) => box([x, y, f + 0.25], [1, 0.5, 0.5], "metal"));
+    },
+    xiao(z) {
+      const b = z - 2.105, y0 = -17.8;
+      box([0, y0 + 10.475, b + 0.5], [17.78, 20.95, 1], "chip");
+      box([0, y0 + 12.01, b + 1 + 1], [12.6, 10.6, 2], "metal");
+      box([0, y0 - 1.53 + 3.65, b + 2.105], [8.94, 7.3, 4.21], "metal");
+    },
+    st25(z) {
+      box([13, -1, z], [5, 5, 1], "chip");
+      rectZ(11.3, 0.7, z + 0.51, 0.8, 0.8, "fill:var(--line-2)", "x");
+    },
+    chassis(z) {
+      prism(rrBox(-18.3, 18.3, -18.3, 16.9, [5.8, 5.8, 4.4, 4.4]), z - 0.6, z + 0.6, "plate");
+    },
+    lcd(z) {
+      box([0, 18.2, z - 3.6], [12, 0.2, 5.8], "cu");
+      box([0, 16.9, z - 6.6], [12, 2.8, 0.2], "cu");
+      box([0, 17.95, z], [12, 0.7, 1.4], "cu");
+      prism(rrSq(17.6, 5), z - 0.7, z + 0.7, "lcd");
+      const zf = z + 0.71, q = 33.6 / 27.72;
+      capZ(zf, rrSq(16.8, 4.3), [], "fill:var(--lcd-lo)");
+      if (B.W[2] > 0) {
+        let e = "";
+        [-5.6, 5.6].forEach(ex => (BLINK ? EYE_SHUT : EYE).forEach((row, i) => [...row].forEach((ch, j) => {
+          if (ch === "X") e += `<polygon points="${pts(rz((ex + (j - 3.5 + LOOK) * 1.05) * q, (-1 + (3.5 - i) * 1.05) * q, zf + 0.01, 0.95 * q, 0.95 * q))}" style="fill:var(--pix)"/>`;
+        })));
+        buf.push(`<g filter="url(#glow)">${e}</g>`);
+      }
+    },
+    shell(z) {
+      const zF = z + 18, zK = z - 18, base = rrN(20.5, R_FACE);
+      loft(rrN(18.5, 6), [[0, zK, 0], [0, zF - 2, 0]], "shell", true);
+      loft(base, [[0, zK, 0], ...fillet(F_FRONT, zF, 1)], "shell");
+      const recess = rrSq(18.6, 6.1), open = rrSq(17.8, 5.2), zl = zF - 1;
+      holeWall(open, zl - 1, zl, "shell");
+      capZ(zl, recess, [open], "fill:var(--shell-lo)");
+      holeWall(recess, zl, zF, "shell");
+      capZ(zF, rrSq(20.5 - F_FRONT, R_FACE - F_FRONT), [recess], `fill:${tone("shell", [0, 0, 1])}`);
+      if (B.W[1] > 0) [-4, 4].forEach(x => buf.push(`<polygon points="${pts([[x - .9, 20.52, -.9], [x + .9, 20.52, -.9], [x + .9, 20.52, .9], [x - .9, 20.52, .9]])}" style="fill:var(--bp-deep)"/>`));
+    },
+    lanyard(z) {
+      const a = P([-4, 20.5, z]), b = P([-18, 70, z]), c = P([18, 70, z]), d = P([4, 20.5, z]);
+      const path = `M${fp(a)} C${fp(b)} ${fp(c)} ${fp(d)}`;
+      buf.push(`<path class="cable" d="${path}"/><path class="cable2" d="${path}"/>`);
+      buf.push(`<path d="${path}" fill="none" stroke="transparent" stroke-width="14" vector-effect="non-scaling-stroke"/>`);
+    },
+    antenna(z) {
+      box([11, 17.65, z - 2.8], [4, 0.2, 5.3], "cu");
+      box([11, 16.875, z - 5.55], [4, 1.75, 0.2], "cu");
+      prism(rrSq(17.5, 5), z - 0.15, z + 0.15, "cu", true);
+      capZ(z + 0.15, rrSq(17.5, 5), [rrSq(15.5, 3)], `fill:${tone("cu", [0, 0, 1])}`);
+    },
+    glass(z) {
+      prism(rrSq(18.5, 6), z - 0.5, z + 0.5, "glass", true);
+      const zf = z + 0.5, win = rrSq(16.9, 4.5);
+      capZ(zf, rrSq(18.5, 6), [win], `fill:${tone("glass", [0, 0, 1])}`);
+      capZ(zf, win, [], "fill:var(--glass-hi);fill-opacity:.13");
+      if (B.W[2] > 0) buf.push(`<polygon points="${pts([[-15.5, 16.9, zf], [-4, 16.9, zf], [-16.9, 4, zf], [-16.9, 15.5, zf]])}" style="fill:var(--pix);fill-opacity:.07"/>`);
+    }
+  };
+
+  /* ---------------- état ---------------- */
+  const svg = document.getElementById("svg"), scene = document.getElementById("scene"), over = document.getElementById("over");
+  const panel = document.getElementById("panel"), scrolly = document.getElementById("scrolly");
+  const floatG = document.getElementById("float"), shadowG = document.getElementById("shadow");
+  const wordmark = document.getElementById("wordmark"), roEx = document.getElementById("ro-ex"), roCam = document.getElementById("ro-cam");
+  const draw = document.getElementById("draw"), xh = document.getElementById("xh"), xhl = document.getElementById("xhl");
+  let progress = 0, hover = null, pinned = null, dirty = true;
+  const touch = matchMedia("(hover: none)").matches;
+  const active = () => hover || pinned;
+
+  function partZ(p, ex) {
+    const owner = p.parent ? byId[p.parent] : p;
+    const t = ease(clamp((ex - owner.delay) / (1 - 0.18)));
+    return t * (owner.ez - owner.c[2]);
+  }
+
+  /* ---------------- rendu ---------------- */
+  function render() {
+    dirty = false;
+    const p = progress, now = performance.now();
+    if (!calm) {
+      const cyc = now % 4600;
+      BLINK = cyc < 150 || (cyc > 420 && cyc < 560 && Math.floor(now / 4600) % 3 === 0);
+      const s = Math.sin(now / 2100);
+      LOOK = Math.abs(s) > 0.55 ? Math.sign(s) : 0;
+    }
+    const camT = ease(clamp((p - 0.02) / 0.3));
+    const ex = clamp((p - 0.14) / 0.56);
+    const rect = svg.getBoundingClientRect();
+    if (rect.width < 20 || rect.height < 20) { dirty = true; return; }
+    const tall = rect.width < rect.height * 0.95;
+    const goal = tall ? { th: 16, ph: 44 } : { th: 44, ph: 23 };
+    const camTh = lerp(31, goal.th, camT), camPh = lerp(9, goal.ph, camT);
+    camera(camTh, camPh);
+
+    const act = active();
+    let html = "";
+    const boxes = {};
+    for (const id of ORDER) {
+      const part = byId[id], dz = partZ(part, ex);
+      buf = [];
+      GEO[id](part.c[2] + dz);
+      html += `<g class="part${act === id ? " on" : ""}" data-part="${id}">${buf.join("")}</g>`;
+      boxes[id] = { c: [part.c[0], part.c[1], part.c[2] + dz], s: part.dims };
+    }
+    scene.innerHTML = html;
+    scene.classList.toggle("focus", !!act);
+
+    // cadrage
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    const corners = (c, s) => { const r = []; for (const a of [-1, 1]) for (const b of [-1, 1]) for (const d of [-1, 1]) r.push([c[0] + a * s[0] / 2, c[1] + b * s[1] / 2, c[2] + d * s[2] / 2]); return r; };
+    const scr = {};
+    for (const id of ORDER) {
+      const pp = corners(boxes[id].c, id === "lanyard" ? [26, 38, 2] : boxes[id].s).map(P);
+      let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+      pp.forEach(q => { a = Math.min(a, q[0]); b = Math.min(b, q[1]); c = Math.max(c, q[0]); d = Math.max(d, q[1]); });
+      scr[id] = { x0: a, y0: b, x1: c, y1: d };
+      minX = Math.min(minX, a); minY = Math.min(minY, b); maxX = Math.max(maxX, c); maxY = Math.max(maxY, d);
+    }
+    const w = maxX - minX, h = maxY - minY;
+    const pad = lerp(0.06, tall ? 0.14 : 0.1, camT) * Math.max(w, h) + 4;
+    const padL = tall ? pad : pad * 1.2, padR = tall ? pad * 2.2 : pad;
+    let vx = minX - padL, vy = minY - pad * (tall ? 1.3 : 1.5), vw = w + padL + padR, vh = h + pad * (tall ? 2.6 : 2.6);
+    const hud = document.querySelector(".hud");
+    const hudPx = hud.getBoundingClientRect().bottom - rect.top + 14, footPx = rect.width < 600 ? 24 : 76;
+    const usable = Math.max(rect.height - hudPx - footPx, rect.height * 0.45);
+    const k = Math.max(vw / rect.width, vh / usable);
+    const ccx = vx + vw / 2, ccy = vy + vh / 2;
+    vw = rect.width * k; vh = rect.height * k;
+    vx = ccx - vw / 2; vy = ccy - (hudPx + usable / 2) * k;
+    svg.setAttribute("viewBox", `${vx.toFixed(2)} ${vy.toFixed(2)} ${vw.toFixed(2)} ${vh.toFixed(2)}`);
+
+    // flottement du cube monté et son ombre au sol
+    const rest = 1 - ex, bob = calm ? 0 : Math.sin(now / 1000 * 1.15) * 1.6 * rest;
+    floatG.setAttribute("transform", `translate(0 ${(-bob).toFixed(3)})`);
+    const base = P([0, -20.5, 0]), shw = 30 * (1 - bob * 0.03);
+    shadowG.innerHTML = rest > 0.02 ? `<ellipse cx="${base[0].toFixed(2)}" cy="${(base[1] + 9).toFixed(2)}" rx="${shw.toFixed(2)}" ry="${(shw * 0.2).toFixed(2)}" fill="url(#shade)" opacity="${(rest * (0.75 - bob * 0.06)).toFixed(3)}"/>` : "";
+
+    // étiquettes : un numéro par pièce, le nom seulement pour la pièce active
+    let o = "";
+    if (ex > 0.55) {
+      const op = clamp((ex - 0.55) / 0.25);
+      const R = 8.5 * k, placed = [];
+      for (const id of ORDER) {
+        const part = byId[id], sb = scr[id];
+        const up = tall ? null : part.lab[0] === "u";
+        let ax, ay, bx, by;
+        if (tall) { ax = sb.x1; ay = (sb.y0 + sb.y1) / 2; bx = sb.x1 + 22 * k; by = ay; }
+        else { ax = (sb.x0 + sb.x1) / 2 + part.lab[1] * (sb.x1 - sb.x0) * 0.25; ay = up ? sb.y0 : sb.y1; bx = ax; by = up ? ay - 22 * k : ay + 22 * k; }
+        for (let guard = 0; guard < 12; guard++) {
+          const hit = placed.some(q => Math.hypot(q[0] - bx, q[1] - by) < 2 * R + 3 * k);
+          if (!hit) break;
+          if (tall) by += 2 * R + 3 * k; else by += (up ? -1 : 1) * (2 * R + 3 * k);
+        }
+        placed.push([bx, by]);
+        const on = act === id ? " on" : "";
+        o += `<g class="bal${on}" data-part="${id}" opacity="${op.toFixed(2)}">`;
+        o += `<line class="ld" x1="${ax.toFixed(2)}" y1="${ay.toFixed(2)}" x2="${bx.toFixed(2)}" y2="${(by + (tall ? 0 : (up ? R : -R))).toFixed(2)}"/>`;
+        o += `<circle class="bl" cx="${bx.toFixed(2)}" cy="${by.toFixed(2)}" r="${R.toFixed(2)}"/>`;
+        o += `<text class="bn" x="${bx.toFixed(2)}" y="${(by + 3.9 * k).toFixed(2)}" text-anchor="middle" style="font-size:${(11 * k).toFixed(2)}px;stroke-width:0">${part.n}</text>`;
+        if (on) o += `<text class="bt" x="${(bx + R + 6 * k).toFixed(2)}" y="${(by + 4.2 * k).toFixed(2)}" style="font-size:${(13 * k).toFixed(2)}px;stroke-width:${(4 * k).toFixed(2)}px">${part.name}</text>`;
+        o += `</g>`;
+      }
+    }
+    if (act && act !== "lanyard") {
+      const ap = byId[act];
+      o += ap.vis ? dims({ c: [ap.vc ? ap.vc[0] : boxes[act].c[0], ap.vc ? ap.vc[1] : boxes[act].c[1], boxes[act].c[2] + ap.dims[2] / 2], s: [ap.vis[0], ap.vis[1], 0] }, k, true) + dims(boxes[act], k, false, true) : dims(boxes[act], k);
+    }
+    over.innerHTML = o;
+
+    // interface
+    document.getElementById("fill").style.width = (ex * 100).toFixed(1) + "%";
+    document.getElementById("hint").style.opacity = p < 0.03 ? 1 : 0;
+    wordmark.style.opacity = (1 - clamp(p / 0.16)).toFixed(3);
+    wordmark.style.transform = `translate(-50%, -50%) scale(${(1 + p * 0.6).toFixed(3)})`;
+    roEx.textContent = String(Math.round(ex * 100)).padStart(3, "0") + " %";
+    roCam.textContent = `θ ${Math.round(camTh)}° · φ ${Math.round(camPh)}°`;
+    setPhase(p < 0.12 ? 0 : ex < 0.6 ? 1 : 2);
+  }
+
+  function dims(bx, k, faceOnly, thickOnly) {
+    const [cx, cy, cz] = bx.c, [sx, sy, sz] = bx.s;
+    const g = Math.max(4, 0.16 * Math.max(sx, sy)) + 2;
+    let s = "";
+    const line = (a, b, off, label) => {
+      const a2 = add(a, off), b2 = add(b, off);
+      const A = P(a), Bq = P(b), A2 = P(a2), B2 = P(b2);
+      const ext = (p, q) => { const dx = q[0] - p[0], dy = q[1] - p[1], l = Math.hypot(dx, dy) || 1; return [q[0] + dx / l * 4 * k, q[1] + dy / l * 4 * k]; };
+      const e1 = ext(A, A2), e2 = ext(Bq, B2);
+      s += `<line class="dx" x1="${A[0]}" y1="${A[1]}" x2="${e1[0]}" y2="${e1[1]}"/><line class="dx" x1="${Bq[0]}" y1="${Bq[1]}" x2="${e2[0]}" y2="${e2[1]}"/>`;
+      s += `<line class="dl" x1="${A2[0]}" y1="${A2[1]}" x2="${B2[0]}" y2="${B2[1]}"/>`;
+      const ux = B2[0] - A2[0], uy = B2[1] - A2[1], ul = Math.hypot(ux, uy) || 1, u = [ux / ul, uy / ul];
+      const tk = [(u[0] - u[1]) * 0.7071 * 5 * k, (u[0] + u[1]) * 0.7071 * 5 * k];
+      [A2, B2].forEach(q => s += `<line class="dl" style="stroke-width:1.6" x1="${q[0] - tk[0]}" y1="${q[1] - tk[1]}" x2="${q[0] + tk[0]}" y2="${q[1] + tk[1]}"/>`);
+      const mid = [(A2[0] + B2[0]) / 2, (A2[1] + B2[1]) / 2], ctr = P([cx, cy, cz]);
+      let nx = -u[1], ny = u[0];
+      if ((mid[0] - ctr[0]) * nx + (mid[1] - ctr[1]) * ny < 0) { nx = -nx; ny = -ny; }
+      const tx = mid[0] + nx * 12 * k, ty = mid[1] + ny * 12 * k + 4 * k;
+      s += `<text class="dt" x="${tx}" y="${ty}" text-anchor="middle" style="font-size:${(12.5 * k).toFixed(2)}px;stroke-width:${(4 * k).toFixed(2)}px">${label}</text>`;
+    };
+    if (!thickOnly) {
+      line([cx - sx / 2, cy - sy / 2, cz + sz / 2], [cx + sx / 2, cy - sy / 2, cz + sz / 2], [0, -g, 0], mm(sx));
+      line([cx + sx / 2, cy - sy / 2, cz + sz / 2], [cx + sx / 2, cy + sy / 2, cz + sz / 2], [g, 0, 0], mm(sy));
+    }
+    if (!faceOnly) line([cx + sx / 2, cy - sy / 2, cz - sz / 2], [cx + sx / 2, cy - sy / 2, cz + sz / 2], [g * .75, -g * .75, 0], mm(sz));
+    return s;
+  }
+
+  /* ---------------- fiche ---------------- */
+  const PHASES = [
+    ["01", "Un cube noir", "41 × 41 × 41 mm d'ABS mat. Un écran carré sous verre, deux yeux. On approche son téléphone, le paiement part."],
+    ["02", "Éclatement", "La vitre et l'écran, collés ensemble, sortent par l'avant. Le reste sort par l'arrière, dans l'ordre du montage."],
+    ["03", touch ? "Touchez une pièce" : "Survolez une pièce", "Ses cotes s'affichent sur le dessin, sa fiche et son lien produit dans le panneau."]
+  ];
+  let curPhase = -1;
+  function setPhase(i) {
+    if (i === curPhase) return; curPhase = i;
+    const [a, b, c] = PHASES[i];
+    document.getElementById("phase").innerHTML = `<span class="k">${a}</span><div><span class="t">${b}</span><span class="d">${c}</span></div>`;
+  }
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  let panelFor = undefined;
+  function renderPanel() {
+    const id = active();
+    if (id === panelFor) return; panelFor = id;
+    if (!id) {
+      panel.innerHTML = `<div class="eyebrow">Nomenclature · 11 pièces</div><h2>Choisissez une pièce</h2>
+        <p class="big">${touch ? "Touchez" : "Survolez"} une pièce du dessin ou de la liste. Un clic la garde affichée.</p>
+        <ul class="plist">${PARTS.map(p => `<li><button type="button" data-pick="${p.id}"><span class="no">${String(p.n).padStart(2, "0")}</span><span class="nm">${esc(p.name)}</span><span class="rf">${esc(p.ref)}</span></button></li>`).join("")}</ul>`;
+      return;
+    }
+    const p = byId[id];
+    const lab = p.id === "lanyard" ? ["Entraxe", "Boucle", "Câble Ø"] : ["Largeur", "Hauteur", "Épaisseur"];
+    panel.innerHTML = `<button type="button" class="back" data-pick="">← Toutes les pièces</button>
+      <div class="eyebrow" style="margin-top:14px">Pièce ${String(p.n).padStart(2, "0")} · <span class="tag ${p.kind}">${p.kind === "std" ? "Catalogue" : "Sur mesure"}</span></div>
+      <h2>${esc(p.name)}</h2>
+      <div class="ref">${esc(p.ref)}</div>
+      ${p.vis ? `<div class="eyebrow" style="margin-top:16px">Image visible · carrée</div><div class="dims" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:6px"><div><small>Largeur</small><b>${mm(p.vis[0])}</b></div><div><small>Hauteur</small><b>${mm(p.vis[1])}</b></div></div><div class="eyebrow" style="margin-top:14px">Dalle complète</div>` : ""}
+      <div class="dims"${p.vis ? ' style="margin-top:6px"' : ""}>${p.dims.map((v, i) => `<div><small>${lab[i]}</small><b>${mm(v)}</b></div>`).join("")}</div>
+      <dl class="specs">${p.specs.map(([a, b]) => `<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join("")}</dl>
+      ${p.note ? `<p class="note">${esc(p.note)}</p>` : ""}
+      ${p.links.length ? `<div class="links">${p.links.map(([a, u]) => `<a href="${u}" target="_blank" rel="noopener"><span>${esc(a)}</span><span aria-hidden="true">↗</span></a>`).join("")}</div>` : `<p class="note">Pièce à fabriquer d'après les cotes. Pas de référence catalogue.</p>`}`;
+  }
+  panel.addEventListener("click", e => {
+    const b = e.target.closest("[data-pick]"); if (!b) return;
+    pinned = b.dataset.pick || null; hover = null; dirty = true; renderPanel();
+  });
+  panel.addEventListener("pointerover", e => {
+    if (touch) return;
+    const b = e.target.closest("[data-pick]");
+    const id = b && b.dataset.pick ? b.dataset.pick : null;
+    if (id !== hover && b && b.closest(".plist")) { hover = id; dirty = true; }
+  });
+  panel.addEventListener("pointerleave", () => { if (hover) { hover = null; dirty = true; } });
+
+  /* ---------------- interactions sur le dessin ---------------- */
+  const pick = e => { const g = e.target.closest && e.target.closest("[data-part]"); return g ? g.dataset.part : null; };
+  svg.addEventListener("pointermove", e => { if (e.pointerType === "touch") return; const id = pick(e); if (id !== hover) { hover = id; dirty = true; } });
+  svg.addEventListener("pointerleave", () => { if (hover) { hover = null; dirty = true; } });
+  draw.addEventListener("pointermove", e => {
+    if (e.pointerType === "touch") return;
+    const r = draw.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    xh.style.setProperty("--x", x + "px"); xh.style.setProperty("--y", y + "px");
+    xh.classList.add("on");
+    const id = active();
+    xhl.textContent = id ? `${String(byId[id].n).padStart(2, "0")} · ${byId[id].name}` : `${String(Math.round(x)).padStart(4, "0")} · ${String(Math.round(y)).padStart(4, "0")}`;
+  });
+  draw.addEventListener("pointerleave", () => xh.classList.remove("on"));
+  svg.addEventListener("click", e => { const id = pick(e); pinned = id && id !== pinned ? id : null; hover = touch ? null : hover; dirty = true; });
+
+  /* ---------------- boucle ---------------- */
+  function readScroll() {
+    const r = scrolly.getBoundingClientRect(), span = r.height - innerHeight;
+    const v = clamp(-r.top / (span || 1));
+    if (Math.abs(v - progress) > 1e-4) { progress = v; dirty = true; }
+  }
+  addEventListener("scroll", readScroll, { passive: true });
+  addEventListener("resize", () => { dirty = true; });
+  (function loop() {
+    readScroll();
+    if (!calm && document.visibilityState === "visible" && scrolly.getBoundingClientRect().bottom > 0) dirty = true;
+    if (dirty) { render(); renderPanel(); }
+    requestAnimationFrame(loop);
+  })();
+
+  /* ---------------- nomenclature ---------------- */
+  document.getElementById("bom").innerHTML = PARTS.map(p => `<tr>
+    <td class="n">${String(p.n).padStart(2, "0")}</td><td>${esc(p.name)}</td>
+    <td><span class="tag ${p.kind}">${p.kind === "std" ? "Catalogue" : "Sur mesure"}</span></td>
+    <td class="r">${esc(p.ref)}</td><td class="d">${p.dims.map(mm).join(" × ")}</td>
+    <td>${p.links.length ? `<a href="${p.links[0][1]}" target="_blank" rel="noopener">${esc(p.links[0][0])} ↗</a>` : "—"}</td></tr>`).join("");
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  const sec = document.getElementById("r3d");
+  if (!window.THREE || !window.BLOCKY_PARTS) { sec.hidden = true; return; }
+  const T = THREE, PARTS = window.BLOCKY_PARTS, byId = Object.fromEntries(PARTS.map(p => [p.id, p]));
+  const canvas = document.getElementById("gl"), stage = document.getElementById("r3dStage"), tip = document.getElementById("tip3");
+  let renderer;
+  try { renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch (e) { sec.hidden = true; return; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.outputEncoding = T.sRGBEncoding;
+  renderer.toneMapping = T.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  const scene = new T.Scene();
+  const camera = new T.PerspectiveCamera(26, 1, 5, 4000);
+
+  /* studio : boîtes à lumière pour les reflets */
+  const pmrem = new T.PMREMGenerator(renderer);
+  const studio = new T.Scene();
+  studio.background = new T.Color(0x07080a);
+  const softbox = (w, h, pos, color, k) => {
+    const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(color).multiplyScalar(k), side: T.DoubleSide }));
+    m.position.set(...pos); m.lookAt(0, 0, 0); studio.add(m);
+  };
+  softbox(260, 160, [0, 300, 80], 0xffffff, 2.6);
+  softbox(140, 260, [-300, 60, 160], 0xd6e4ff, 1.5);
+  softbox(90, 240, [300, 40, -20], 0xffe3c4, 1.1);
+  softbox(420, 30, [0, 10, -320], 0xffffff, 0.7);
+  softbox(60, 60, [120, -40, 300], 0xffffff, 0.5);
+  scene.environment = pmrem.fromScene(studio, 0.03, 1, 1500).texture;
+
+  const key = new T.DirectionalLight(0xffffff, 1.6);
+  key.position.set(90, 220, 140); key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  Object.assign(key.shadow.camera, { left: -260, right: 260, top: 260, bottom: -260, near: 20, far: 800 });
+  key.shadow.radius = 8; key.shadow.bias = -0.0004;
+  scene.add(key, key.target);
+  scene.add(new T.HemisphereLight(0xaec4ff, 0x080808, 0.25));
+  const ground = new T.Mesh(new T.PlaneGeometry(3000, 3000), new T.ShadowMaterial({ opacity: 0.42 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -29; ground.receiveShadow = true;
+  scene.add(ground);
+
+  /* matières */
+  const std = (o) => new T.MeshStandardMaterial(o);
+  const M = {
+    abs: new T.MeshPhysicalMaterial({ color: 0x0b0c0e, roughness: 0.58, metalness: 0, clearcoat: 0.12, clearcoatRoughness: 0.5, envMapIntensity: 0.55, side: T.DoubleSide }),
+    absIn: std({ color: 0x08090a, roughness: 0.85, envMapIntensity: 0.4, side: T.DoubleSide }),
+    glass: new T.MeshPhysicalMaterial({ color: 0x08090b, roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.02, transparent: true, opacity: 0.14, depthWrite: false }),
+    ink: std({ color: 0x030304, roughness: 0.2, side: T.DoubleSide }),
+    panel: std({ color: 0x15171c, roughness: 0.38, metalness: 0.35 }),
+    flex: std({ color: 0xcf8a2e, roughness: 0.42, metalness: 0.15 }),
+    copper: std({ color: 0xc8813f, roughness: 0.3, metalness: 1 }),
+    ferrite: std({ color: 0x26272b, roughness: 0.75 }),
+    plastic: std({ color: 0x2b2d33, roughness: 0.58 }),
+    pcb: std({ color: 0x0f1a15, roughness: 0.45 }),
+    xiao: std({ color: 0x14161c, roughness: 0.4 }),
+    gold: std({ color: 0xd8a94e, roughness: 0.22, metalness: 1 }),
+    metal: std({ color: 0xc9cdd3, roughness: 0.2, metalness: 1 }),
+    chip: std({ color: 0x0f1013, roughness: 0.5 }),
+    foil: std({ color: 0xbfc4cc, roughness: 0.36, metalness: 0.85 }),
+    kapton: std({ color: 0xd99a2b, roughness: 0.35 }),
+    red: std({ color: 0xb3261e, roughness: 0.5 }),
+    cable: std({ color: 0x1c1d20, roughness: 0.5, metalness: 0.25 })
+  };
+  /* image de l'écran : deux yeux en pixels, carte émissive */
+  const eyeCv = document.createElement("canvas"); eyeCv.width = eyeCv.height = 512;
+  const eyeTex = new T.CanvasTexture(eyeCv); eyeTex.encoding = T.sRGBEncoding;
+  eyeTex.repeat.set(1 / 33.6, 1 / 33.6); eyeTex.offset.set(0.5, 0.5);
+  M.oled = std({ color: 0x000000, roughness: 0.3, emissive: 0xffffff, emissiveMap: eyeTex, emissiveIntensity: 1.6, toneMapped: false });
+  const EYE = ["..XXXX..", ".XXXXXX.", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX.."];
+  const SHUT = ["........", "........", "........", "........", ".XXXXXX.", "........", "........", "........"];
+  function drawEyes(shut, look) {
+    const g = eyeCv.getContext("2d"), s = 512 / 33.6, q = 33.6 / 27.72;
+    g.fillStyle = "#000"; g.fillRect(0, 0, 512, 512); g.fillStyle = "#fff";
+    [-5.6, 5.6].forEach(ex => (shut ? SHUT : EYE).forEach((row, i) => [...row].forEach((c, j) => {
+      if (c !== "X") return;
+      const x = (ex + (j - 3.5 + look) * 1.05) * q, y = (-1 + (3.5 - i) * 1.05) * q, w = 0.95 * q;
+      g.fillRect((x - w / 2 + 16.8) * s, (16.8 - y - w / 2) * s, w * s, w * s);
+    })));
+    eyeTex.needsUpdate = true;
+  }
+  drawEyes(false, 0);
+
+  /* géométries */
+  const shape = (pts, holes = []) => {
+    const sh = new T.Shape(pts.map(p => new T.Vector2(p[0], p[1])));
+    holes.forEach(h => sh.holes.push(new T.Path(h.map(p => new T.Vector2(p[0], p[1])))));
+    return sh;
+  };
+  function rrBox(x0, x1, y0, y1, r, seg = 10) {
+    const q = Array.isArray(r) ? r : [r, r, r, r], out = [];
+    const arc = (cx, cy, rad, a0) => { for (let k = 0; k <= seg; k++) { const a = a0 + Math.PI / 2 * k / seg; out.push([cx + rad * Math.cos(a), cy + rad * Math.sin(a)]); } };
+    arc(x1 - q[1], y0 + q[1], q[1], -Math.PI / 2); arc(x1 - q[3], y1 - q[3], q[3], 0);
+    arc(x0 + q[2], y1 - q[2], q[2], Math.PI / 2); arc(x0 + q[0], y0 + q[0], q[0], Math.PI);
+    return out;
+  }
+  const rrSq = (h, r) => rrBox(-h, h, -h, h, r);
+  function rrN(h, r, seg = 12) {
+    const out = [], c = h - r;
+    [[c, -c, -Math.PI / 2], [c, c, 0], [-c, c, Math.PI / 2], [-c, -c, Math.PI]].forEach(([cx, cy, a0]) => {
+      for (let k = 0; k <= seg; k++) { const a = a0 + Math.PI / 2 * k / seg; out.push({ p: [cx + r * Math.cos(a), cy + r * Math.sin(a)], n: [Math.cos(a), Math.sin(a)] }); }
+    });
+    return out;
+  }
+  const fillet = (r, zEdge, sign, steps = 8) => Array.from({ length: steps + 1 }, (_, k) => {
+    const f = Math.PI / 2 * k / steps; return [r * (1 - Math.cos(f)), zEdge - sign * r + sign * r * Math.sin(f), sign * f];
+  });
+  function loftGeo(base, rings, inward) {
+    const pos = [], nor = [], idx = [], n = base.length;
+    rings.forEach(([d, z, f]) => base.forEach(V => {
+      pos.push(V.p[0] - V.n[0] * d, V.p[1] - V.n[1] * d, z);
+      const s = inward ? -1 : 1; nor.push(s * V.n[0] * Math.cos(f), s * V.n[1] * Math.cos(f), s * Math.sin(f));
+    }));
+    for (let j = 0; j < rings.length - 1; j++) for (let i = 0; i < n; i++) {
+      const a = j * n + i, b = j * n + (i + 1) % n, c = (j + 1) * n + (i + 1) % n, d = (j + 1) * n + i;
+      if (inward) idx.push(a, c, b, a, d, c); else idx.push(a, b, c, a, c, d);
+    }
+    const g = new T.BufferGeometry();
+    g.setAttribute("position", new T.Float32BufferAttribute(pos, 3));
+    g.setAttribute("normal", new T.Float32BufferAttribute(nor, 3));
+    g.setIndex(idx); return g;
+  }
+  function cap(outer, holes, z, flip) {
+    const g = new T.ShapeGeometry(shape(outer, holes), 12);
+    if (flip) { g.rotateY(Math.PI); g.scale(-1, 1, 1); }
+    g.translate(0, 0, z); return g;
+  }
+  function plate(outline, z0, z1, bev = 0.15) {
+    const g = new T.ExtrudeGeometry(shape(outline), { depth: Math.max(0.01, z1 - z0 - 2 * bev), bevelEnabled: bev > 0, bevelThickness: bev, bevelSize: bev, bevelSegments: 3, curveSegments: 10 });
+    g.translate(0, 0, z0 + bev); return g;
+  }
+  function blk(x, y, z, w, h, t, mat, bev = 0.08) {
+    const g = plate(rrBox(-w / 2 + bev, w / 2 - bev, -h / 2 + bev, h / 2 - bev, Math.min(0.4, Math.min(w, h) / 2 - bev - 0.01)), -t / 2, t / 2, bev);
+    const m = new T.Mesh(g, mat); m.position.set(x, y, z); return m;
+  }
+  const mesh = (g, mat) => new T.Mesh(g, mat);
+
+  /* pièces, dans le repère monté (face avant à z = +20,5) */
+  const BUILD = {
+    shell(G) {
+      const zF = 20.5, zK = -15.5;
+      G.add(mesh(loftGeo(rrN(20.5, 8), [[0, zK, 0], ...fillet(1.5, zF, 1)]), M.abs));
+      G.add(mesh(loftGeo(rrN(18.5, 6), [[0, zK, 0], [0, 18.5, 0]], true), M.absIn));
+      const recess = rrSq(18.6, 6.1), open = rrSq(17.8, 5.2);
+      G.add(mesh(cap(rrSq(19, 6.5), [recess], zF), M.abs));
+      G.add(mesh(loftGeo(rrN(18.6, 6.1), [[0, 19.5, 0], [0, zF, 0]], true), M.abs));
+      G.add(mesh(cap(recess, [open], 19.5), M.absIn));
+      G.add(mesh(loftGeo(rrN(17.8, 5.2), [[0, 18.5, 0], [0, 19.5, 0]], true), M.absIn));
+      G.add(mesh(cap(rrSq(20.5, 8), [rrSq(18.5, 6)], zK, true), M.abs));
+      [-4, 4].forEach(x => { const h = new T.Mesh(new T.CylinderGeometry(0.9, 0.9, 0.1, 24), M.ink); h.position.set(x, 20.52, 0); G.add(h); });
+    },
+    cover(G) {
+      const zB = -20.5, zP = -15.5;
+      G.add(mesh(loftGeo(rrN(20.5, 8), [...fillet(4, zB, -1).reverse(), [0, zP, 0]]), M.abs));
+      G.add(mesh(cap(rrSq(16.5, 4), [], zB, true), M.abs));
+      G.add(mesh(cap(rrSq(20.5, 8), [rrSq(18.5, 6)], zP), M.abs));
+      G.add(mesh(cap(rrSq(18.5, 6), [], zB + 2), M.absIn));
+      G.add(mesh(loftGeo(rrN(18.5, 6), [[0, zB + 2, 0], [0, zP, 0]], true), M.absIn));
+      [[-14, -14], [14, -14], [-14, 14], [14, 14]].forEach(([x, y]) => {
+        const b = new T.Mesh(new T.CylinderGeometry(2.25, 2.25, 3, 28), M.abs); b.rotation.x = Math.PI / 2; b.position.set(x, y, zB + 3.5); G.add(b);
+        const h = new T.Mesh(new T.CylinderGeometry(1.1, 1.1, 0.1, 20), M.ink); h.rotation.x = Math.PI / 2; h.position.set(x, y, zP + 0.02); G.add(h);
+      });
+    },
+    glass(G) {
+      G.add(mesh(plate(rrSq(18.5, 6), 19.5, 20.5, 0.12), M.glass));
+      G.add(mesh(cap(rrSq(18.4, 5.9), [rrSq(16.9, 4.5)], 19.98), M.ink));
+    },
+    lcd(G) {
+      G.add(mesh(plate(rrSq(17.6, 5), 18.1, 19.5, 0.1), M.panel));
+      G.add(mesh(cap(rrSq(16.8, 4.3), [], 19.505), M.oled));
+      const gc = document.createElement("canvas"); gc.width = gc.height = 128;
+      const gx = gc.getContext("2d"), gr = gx.createRadialGradient(64, 64, 4, 64, 64, 64);
+      gr.addColorStop(0, "rgba(255,255,255,.55)"); gr.addColorStop(1, "rgba(255,255,255,0)"); gx.fillStyle = gr; gx.fillRect(0, 0, 128, 128);
+      const glowTex = new T.CanvasTexture(gc);
+      [-6.79, 6.79].forEach(x => { const g = new T.Mesh(new T.PlaneGeometry(18, 18), new T.MeshBasicMaterial({ map: glowTex, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); g.position.set(x, -1.2, 20.7); g.userData.glow = true; g.renderOrder = 5; G.add(g); });
+      G.add(blk(0, 17.95, 18.8, 12, 0.7, 1.4, M.flex, 0.05));
+      G.add(blk(0, 18.2, 15.2, 12, 0.2, 5.8, M.flex, 0.02));
+      G.add(blk(0, 16.9, 12.2, 12, 2.8, 0.2, M.flex, 0.02));
+    },
+    antenna(G) {
+      const ring = shape(rrSq(17.5, 5), [rrSq(15.5, 3)]);
+      const flex = new T.ExtrudeGeometry(ring, { depth: 0.15, bevelEnabled: false, curveSegments: 10 }); flex.translate(0, 0, 17.95);
+      const fer = new T.ExtrudeGeometry(ring, { depth: 0.15, bevelEnabled: false, curveSegments: 10 }); fer.translate(0, 0, 17.8);
+      G.add(mesh(flex, M.flex), mesh(fer, M.ferrite));
+      [0.4, 0.9, 1.4].forEach(d => G.add(mesh(cap(rrSq(17.5 - d, 5 - d), [rrSq(17.5 - d - 0.12, 5 - d - 0.12)], 18.11), M.copper)));
+      G.add(blk(11, 17.65, 15.15, 4, 0.2, 5.3, M.flex, 0.02), blk(11, 16.875, 12.4, 4, 1.75, 0.2, M.flex, 0.02));
+    },
+    chassis(G) { G.add(mesh(plate(rrBox(-18.3, 18.3, -18.3, 16.9, [5.8, 5.8, 4.4, 4.4]), 15.75 + 0.75, 16.95 + 0.75, 0.2), M.plastic)); },
+    pcb(G) {
+      G.add(mesh(plate(rrBox(-17.5, 17.5, -18, 17.5, [5.3, 5.3, 5, 5]), 9.3, 10.9, 0.05), M.pcb));
+      const f = 10.9;
+      G.add(blk(0, 13.5, f + 0.6, 12, 4, 1.2, M.chip), blk(0, 12.2, f + 1.25, 11, 1.2, 0.1, M.metal, 0.02));
+      G.add(blk(11, 15.5, f + 0.7, 4, 2.5, 1.4, M.chip), blk(13, 3.5, f + 0.4, 3.2, 2.5, 0.8, M.metal));
+      [[10.5, 6.5], [12, 6.5], [13.5, 6.5], [15, 6.5], [10.5, 9], [12, 9], [13.5, 9], [15, 9]].forEach(([x, y]) => G.add(blk(x, y, f + 0.25, 1, 0.5, 0.5, M.chip, 0.03), blk(x - 0.4, y, f + 0.26, 0.2, 0.5, 0.52, M.metal, 0.01), blk(x + 0.4, y, f + 0.26, 0.2, 0.5, 0.52, M.metal, 0.01)));
+      for (let i = 0; i < 6; i++) G.add(blk(-15 + i * 1.2, 16.2, f + 0.02, 0.7, 1.4, 0.04, M.gold, 0.01));
+    },
+    xiao(G) {
+      const b = 11.0, y0 = -17.8;
+      G.add(blk(0, y0 + 10.475, b + 0.5, 17.78, 20.95, 1, M.xiao, 0.1));
+      for (let i = 0; i < 7; i++) [-8.6, 8.6].forEach(x => G.add(blk(x, y0 + 3 + i * 2.54, b + 0.5, 0.9, 1.4, 1.02, M.gold, 0.05)));
+      G.add(blk(0, y0 + 12.01, b + 2, 12.6, 10.6, 2, M.metal, 0.15));
+      G.add(blk(0, y0 - 1.53 + 3.65, b + 2.105, 8.94, 7.3, 3.26, M.metal, 0.6));
+      G.add(blk(0, y0 - 1.53 + 0.3, b + 2.105, 8.2, 0.6, 2.4, M.ink, 0.3));
+    },
+    st25(G) { G.add(blk(13, -1, 11.4, 5, 5, 1, M.chip, 0.05)); const d = new T.Mesh(new T.CircleGeometry(0.35, 16), M.metal); d.position.set(11.3, 0.7, 11.91); G.add(d); },
+    battery(G) {
+      G.add(blk(0, -1, 5.8, 30, 31, 6, M.foil, 0.9));
+      G.add(blk(0, 13.3, 5.8, 22, 2.4, 6.2, M.kapton, 0.3));
+      G.add(blk(-1.5, 15.7, 9.0, 0.9, 2.6, 0.9, M.red, 0.3), blk(1.5, 15.7, 9.0, 0.9, 2.6, 0.9, M.cable, 0.3));
+    },
+    lanyard(G) {
+      const curve = new T.CubicBezierCurve3(new T.Vector3(-4, 19.5, 0), new T.Vector3(-18, 70, 0), new T.Vector3(18, 70, 0), new T.Vector3(4, 19.5, 0));
+      G.add(mesh(new T.TubeGeometry(curve, 96, 0.75, 14, false), M.cable));
+    }
+  };
+  const ORDER = ["cover", "battery", "pcb", "xiao", "st25", "chassis", "antenna", "shell", "lanyard", "lcd", "glass"];
+  const root = new T.Group(); scene.add(root);
+  const groups = {};
+  ORDER.forEach(id => {
+    const G = new T.Group(); G.userData.id = id; BUILD[id](G);
+    G.traverse(o => { if (o.isMesh && !o.userData.glow) { o.castShadow = true; o.receiveShadow = true; o.userData.id = id; o.userData.base = o.material; } });
+    root.add(G); groups[id] = G;
+  });
+  const hl = new Map();
+  const highlight = (id) => ORDER.forEach(k => groups[k].traverse(o => {
+    if (!o.isMesh || o.userData.glow) return;
+    if (k === id) { if (!hl.has(o.userData.base)) { const c = o.userData.base.clone(); c.emissive = new T.Color(0xffb04a); c.emissiveIntensity = 0.22; if (c.emissiveMap) { c.emissiveMap = null; } hl.set(o.userData.base, c); } o.material = hl.get(o.userData.base); }
+    else o.material = o.userData.base;
+  }));
+
+  /* éclatement : même ordre et mêmes écarts que le plan, à 75 % */
+  const K = 0.75, clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v)), ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function dzFor(id, ex) {
+    const p = byId[id], o = p.parent ? byId[p.parent] : p;
+    return ease(clamp((ex - o.delay) / (1 - 0.18))) * (o.ez - o.c[2]) * K;
+  }
+
+  /* caméra : orbite à la main + léger mouvement libre */
+  let yaw = -0.62, pitch = 0.32, dragging = false, lastX = 0, lastY = 0, idle = 0, explode = 0, dist = 220, hover = null, visible = false;
+  canvas.addEventListener("pointerdown", e => { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointerup", e => { dragging = false; canvas.releasePointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => {
+    if (dragging) { yaw -= (e.clientX - lastX) * 0.006; pitch = clamp(pitch + (e.clientY - lastY) * 0.004, -0.15, 1.2); lastX = e.clientX; lastY = e.clientY; idle = 0; }
+    pick(e);
+  });
+  canvas.addEventListener("pointerleave", () => { hover = null; tip.style.opacity = 0; highlight(null); });
+  const ray = new T.Raycaster(), mouse = new T.Vector2();
+  const mm = v => String(Math.round(v * 100) / 100).replace(".", ",");
+  function pick(e) {
+    const r = canvas.getBoundingClientRect();
+    mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    ray.setFromCamera(mouse, camera);
+    const hit = ray.intersectObjects(root.children, true).find(h => h.object.userData.id);
+    const id = hit ? hit.object.userData.id : null;
+    if (id !== hover) { hover = id; highlight(id); }
+    if (id) {
+      const p = byId[id], d = p.vis ? `image ${mm(p.vis[0])} × ${mm(p.vis[1])} · dalle ${p.dims.map(mm).join(" × ")}` : p.dims.map(mm).join(" × ");
+      tip.innerHTML = `<b>${String(p.n).padStart(2, "0")}</b>${p.name} · ${d} mm`;
+      tip.style.left = Math.min(e.clientX - r.left + 16, r.width - tip.offsetWidth - 10) + "px";
+      tip.style.top = (e.clientY - r.top + 14) + "px"; tip.style.opacity = 1;
+    } else tip.style.opacity = 0;
+  }
+
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  addEventListener("resize", resize); resize();
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }, { rootMargin: "100px" }).observe(stage);
+
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const box3 = new T.Box3(), sphere = new T.Sphere(), center = new T.Vector3(), tgt = new T.Vector3();
+  let lastEye = "";
+  function frame(t) {
+    requestAnimationFrame(frame);
+    if (!visible) return;
+    const r = sec.getBoundingClientRect(), span = r.height - innerHeight;
+    const p = clamp(-r.top / (span || 1));
+    explode = ease(clamp((p - 0.12) / 0.7));
+    document.getElementById("fill3").style.width = (explode * 100).toFixed(1) + "%";
+    ORDER.forEach(id => { groups[id].position.z = dzFor(id, explode); });
+    const bob = calm ? 0 : Math.sin(t / 1000 * 1.15) * 1.4 * (1 - explode);
+    root.position.y = bob;
+    if (!calm) {
+      const cyc = t % 4600, shut = cyc < 150 || (cyc > 420 && cyc < 560 && Math.floor(t / 4600) % 3 === 0);
+      const s = Math.sin(t / 2100), look = Math.abs(s) > 0.55 ? Math.sign(s) : 0, sig = shut + ":" + look;
+      if (sig !== lastEye) { drawEyes(shut, look); lastEye = sig; }
+    }
+    idle += 1;
+    const y = yaw - 0.5 * explode + (calm || dragging ? 0 : Math.sin(t / 5200) * 0.12 * Math.min(1, idle / 120));
+    box3.setFromObject(root); box3.getBoundingSphere(sphere);
+    center.lerp(sphere.center, 0.12); if (center.lengthSq() === 0) center.copy(sphere.center);
+    const fov = camera.fov * Math.PI / 180, fit = sphere.radius / Math.sin(Math.min(fov, 2 * Math.atan(Math.tan(fov / 2) * camera.aspect)) / 2) * (1.25 - 0.4 * explode);
+    dist += (fit - dist) * 0.12;
+    tgt.set(center.x + dist * Math.sin(y) * Math.cos(pitch), center.y + dist * Math.sin(pitch), center.z + dist * Math.cos(y) * Math.cos(pitch));
+    camera.position.copy(tgt); camera.lookAt(center);
+    key.target.position.copy(center);
+    ground.position.y = -29 + Math.min(0, center.y - 0);
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>

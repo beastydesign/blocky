@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blocky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300..600&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap">
+<style>
+/* Planche technique : vue éclatée à gauche, nomenclature à droite, puis plans cotés et points à valider. Encre sur papier froid. */
+:root {
+  --paper: #eef1f3;
+  --sheet: #f8f9fa;
+  --ink: #18212b;
+  --ink-2: #4c5866;
+  --rule: #c9d0d7;
+  --dim: #2453c9;
+  --warn: #b5541a;
+  --ok: #2c7a4b;
+  /* matières */
+  --abs: #2a2d31;
+  --glass: #0c0f13;
+  --mask: #1a1f26;
+  --lcd: #1c2633;
+  --pix: #f4f7fb;
+  --pcb: #1f5a43;
+  --chip: #15181c;
+  --metal: #b9bfc6;
+  --copper: #c07a3e;
+  --ferrite: #55585e;
+  --batt: #9aa3ad;
+  --chassis: #6d747c;
+  --foam: #d9c9a8;
+  --cable: #3a3f45;
+  --f-display: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --f-body: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --f-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1318; --sheet: #161b22; --ink: #e3e8ee; --ink-2: #9aa6b3; --rule: #2c3540;
+    --dim: #7ea2ff; --warn: #f0a46c; --ok: #6fcf97;
+    --abs: #3a3e44; --glass: #07090c; --mask: #11151b; --lcd: #1a2430; --pix: #ffffff;
+    --pcb: #2a7055; --chip: #0d0f12; --metal: #c4cad1; --copper: #d68a4c; --ferrite: #6a6e75;
+    --batt: #8d97a2; --chassis: #7c848d; --foam: #b8a887; --cable: #8a929b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1318; --sheet: #161b22; --ink: #e3e8ee; --ink-2: #9aa6b3; --rule: #2c3540;
+  --dim: #7ea2ff; --warn: #f0a46c; --ok: #6fcf97;
+  --abs: #3a3e44; --glass: #07090c; --mask: #11151b; --lcd: #1a2430; --pix: #ffffff;
+  --pcb: #2a7055; --chip: #0d0f12; --metal: #c4cad1; --copper: #d68a4c; --ferrite: #6a6e75;
+  --batt: #8d97a2; --chassis: #7c848d; --foam: #b8a887; --cable: #8a929b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+
+header.title { display: grid; grid-template-columns: 1fr auto; gap: 12px 32px; align-items: end; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+h1 { font-family: var(--f-display); font-weight: 600; font-size: clamp(30px, 5vw, 46px); line-height: 1; margin: 0; letter-spacing: -0.01em; }
+.sub { color: var(--ink-2); margin: 6px 0 0; max-width: 62ch; }
+.cartouche { font-family: var(--f-mono); font-size: 12px; display: grid; grid-template-columns: auto auto; gap: 2px 14px; color: var(--ink-2); }
+.cartouche b { color: var(--ink); font-weight: 500; }
+
+h2 { font-family: var(--f-display); font-weight: 600; font-size: 22px; margin: 0 0 4px; text-wrap: balance; }
+h3 { font-family: var(--f-display); font-weight: 600; font-size: 16px; margin: 0 0 6px; letter-spacing: 0.02em; }
+.lede { color: var(--ink-2); margin: 0 0 14px; max-width: 70ch; }
+.label { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+
+.sheet { background: var(--sheet); border: 1px solid var(--rule); padding: 20px; min-width: 0; }
+.grid-main { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 960px) { .grid-main { grid-template-columns: 1fr; } }
+
+.svgbox { overflow-x: auto; }
+.svgbox svg { display: block; width: 100%; height: auto; min-width: 420px; }
+svg text { font-family: var(--f-mono); fill: var(--ink); }
+svg .lbl { font-size: 12px; }
+svg .lbl-s { font-size: 10.5px; fill: var(--ink-2); }
+svg .num { font-size: 11px; font-weight: 500; }
+#explode .lbl { font-size: 15px; }
+#explode .lbl-s { font-size: 12.5px; }
+#explode .num { font-size: 13px; }
+#explode svg { min-width: 520px; }
+svg .dimt { font-size: 11px; fill: var(--dim); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-family: var(--f-mono); font-weight: 500; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); border-bottom: 1.5px solid var(--ink); padding: 6px 8px 6px 0; }
+td { border-bottom: 1px solid var(--rule); padding: 8px 8px 8px 0; vertical-align: top; }
+td.n { font-family: var(--f-mono); font-weight: 500; width: 2.2em; }
+td .ref { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); background: color-mix(in oklab, var(--dim) 10%, transparent); padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+td .meta { display: block; color: var(--ink-2); font-size: 12.5px; margin-top: 2px; }
+.tbl { overflow-x: auto; }
+.tag { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 1px 6px; border-radius: 99px; border: 1px solid currentColor; white-space: nowrap; }
+.tag.std { color: var(--ok); }
+.tag.mes { color: var(--warn); }
+
+.views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 1000px) { .views { grid-template-columns: 1fr; } }
+.views figure { margin: 0; min-width: 0; }
+.views figcaption { margin-top: 8px; color: var(--ink-2); font-size: 13px; }
+.views svg { min-width: 300px; }
+
+.cols2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+@media (max-width: 860px) { .cols2 { grid-template-columns: 1fr; } }
+
+ol.checks { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; }
+ol.checks li { padding-left: 4px; }
+ol.checks b { font-weight: 600; }
+p { margin: 0 0 10px; }
+.note { border-left: 3px solid var(--warn); padding: 4px 0 4px 12px; color: var(--ink); }
+.mono { font-family: var(--f-mono); font-size: 13px; }
+a { color: var(--dim); }
+a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
+.sources { font-size: 13px; columns: 2 300px; column-gap: 28px; padding-left: 1.1em; margin: 0; }
+.sources li { break-inside: avoid; margin-bottom: 4px; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<header class="title">
+  <div>
+    <h1>Blocky</h1>
+    <p class="sub">Module de paiement sans contact : cube ABS noir de 41 mm, écran OLED carré bord à bord sous une vitre (image 33,6 mm), NFC derrière l'écran, recharge USB-C. Toutes les pièces logent dans le cube : encombrement contrôlé par script, aucune collision.</p>
+  </div>
+  <div class="cartouche">
+    <span>Cube</span><b>41 × 41 × 41 mm</b>
+    <span>Écran</span><b>OLED carré · image 33,6</b>
+    <span>Révision</span><b>C · bord à bord</b>
+    <span>Date</span><b>01/10/2026</b>
+    <span>Unités</span><b>mm</b>
+  </div>
+</header>
+
+<section class="sheet">
+  <span class="label">Plans cotés</span>
+  <h2>Face avant, coupe A-A, dessous</h2>
+  <p class="lede">Cotes en mm. La coupe A-A passe par le milieu du cube, l'avant est à gauche. Les éléments en pointillés sont hors du plan de coupe. Vue éclatée interactive, avec les cotes de chaque pièce : <a href="index.html">Blocky Blueprint</a>.</p>
+  <div class="views">
+    <figure><div class="svgbox" id="front"></div><figcaption>Face avant. Angles R8 comme une GoPro, rebord ABS de 2 mm. L'image carrée de 33,6 mm remplit la vitre : il reste 1,6 mm de bord noir.</figcaption></figure>
+    <figure><div class="svgbox" id="section"></div><figcaption>Coupe A-A. Vitre et écran OLED collés ensemble, antenne NFC juste derrière. La nappe repliée passe par le haut, au-dessus du châssis. Il reste 21 mm libres derrière la batterie.</figcaption></figure>
+    <figure><div class="svgbox" id="bottom"></div><figcaption>Dessous. USB-C centré, bouche à 1,17 mm de la surface grâce à une paroi amincie à 1,0 mm.</figcaption></figure>
+  </div>
+</section>
+
+<section class="sheet">
+  <span class="label">Nomenclature · prototype</span>
+  <h2>Pièces et références</h2>
+  <p class="lede"><span class="tag std">Catalogue</span> s'achète tel quel. <span class="tag mes">Sur mesure</span> se fabrique d'après ce plan.</p>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>#</th><th>Pièce</th><th>Référence et cotes</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Vitre de façade <span class="tag mes">Sur mesure</span></td><td>Verre trempé 37,0 × 37,0 × 1,0, coins R6. Sérigraphie noire, fenêtre 33,8 × 33,8 aux coins R4,5, centrée : bord noir visible de 1,6 mm. L'écran y est collé en usine (lamination optique).<span class="meta">Prototype : PMMA 1 mm découpé au laser et masque en vinyle noir.</span></td></tr>
+      <tr><td class="n">2</td><td>Antenne NFC + ferrite <span class="tag mes">Sur mesure</span></td><td>Circuit souple 2 couches 0,11 mm, 4 spires, anneau 35 × 35 extérieur (coins R5), 31 × 31 intérieur (coins R3), juste derrière l'écran. Queue de 4 mm en haut à droite. Ferrite <span class="ref">Würth 364004</span> (WE-FSFS 60 × 60 × 0,1) découpée en cadre, côté carte mère.</td></tr>
+      <tr><td class="n">3</td><td>Coque avant <span class="tag mes">Sur mesure</span></td><td>ABS noir mat, 41 × 41 × 36, angles R8 vus de face (comme une GoPro), arête avant R1,5 autour de la vitre, parois 2,0. Logement de vitre 37,2 × 37,2 × 1,0, coins R6,1. Ouverture écran 35,6 × 35,6, coins R5,2, encoche de 12,4 en haut pour la nappe repliée. 4 bossages Ø4,5 à ±14 mm avec inserts laiton M2. Lumière USB-C 9,6 × 3,6 centrée sous le cube.<span class="meta">Prototype : SLA ou MJF. Série : injection ABS, texture mate.</span></td></tr>
+      <tr><td class="n">4</td><td>Dragonne</td><td>Câble inox 7×7 Ø1,5 gainé nylon noir, boucle de 37 mm. 2 trous Ø1,8 au centre du dessus, entraxe 8. 2 manchons aluminium sertis à l'intérieur comme butées.</td></tr>
+      <tr><td class="n">5</td><td>Écran bord à bord <span class="tag mes">Sur mesure</span></td><td>Dalle AMOLED carrée, image 33,6 × 33,6 centrée aux coins R4,3, encombrement max 35,2 × 35,2 × 1,4, coins R5, bords de 0,8. Nappe de 12 mm au milieu du bord haut, repliée derrière (dépasse de 0,7). 240 × 240 minimum, 400 × 400 conseillé. SPI 4 fils en 3,3 V. Alimentation OLED intégrée à la nappe, entrée 3,3 V unique. Sans feuille métallique au dos. 400 cd/m² minimum, −20 à +70 °C.<span class="meta">Aucun écran carré de cette taille en catalogue : outillage et minimum de commande à chiffrer. Prototype : <span class="ref">BuyDisplay ER-TFT1.54-1</span>, IPS 240 × 240 ST7789, image 27,72 mm, dalle 31,52 × 33,72 × 1,9.</span></td></tr>
+      <tr><td class="n">6</td><td>Châssis <span class="tag mes">Sur mesure</span></td><td>Plaque PC/ABS 36,6 × 35,2 × 1,2, coins R5,8 en bas et R4,4 en haut, arrêtée 1,6 mm sous le haut de la coque pour laisser passer la nappe et la queue d'antenne. Plaque l'antenne contre l'écran.</td></tr>
+      <tr><td class="n">7</td><td>Carte mère <span class="tag mes">Sur mesure</span></td><td>FR4 4 couches 35 × 35,5 × 1,6, coins R5 / R5,3. Face avant : XIAO centrée en bas, connecteur ZIF de l'écran en haut, ST25R3916B avec quartz 27,12 MHz et circuit d'accord à droite, connecteur d'antenne en haut à droite. Face arrière : 2 pastilles BAT+ / BAT− pour les fils de la batterie.</td></tr>
+      <tr><td class="n">8</td><td>Microcontrôleur + USB-C <span class="tag std">Catalogue</span></td><td><span class="ref">Seeed XIAO ESP32S3 · 113991114</span><span class="meta">20,95 × 17,78 × 4,21 avec l'USB-C (mesuré sur le modèle 3D officiel Seeed). ESP32-S3, 8 Mo PSRAM, 8 Mo flash, WiFi + BLE 5.0, chargeur LiPo 100 mA. Soudée à plat par ses bords crénelés.</span></td></tr>
+      <tr><td class="n">9</td><td>Lecteur NFC <span class="tag std">Catalogue</span></td><td><span class="ref">ST ST25R3916B-AQWT</span><span class="meta">VFQFPN-32, 5 × 5 × 1,0. Alimentation 2,4 à 5,5 V. Conforme EMVCo 3.1a. Émulation de carte NFC-A et FeliCa. Quartz 27,12 MHz. Circuit d'accord recopié de la carte ST X-NUCLEO-NFC08A1.</span></td></tr>
+      <tr><td class="n">10</td><td>Batterie <span class="tag std">Catalogue</span></td><td><span class="ref">LP603030 · 500 mAh</span> chez lipobattery.us<span class="meta">LiPo 3,7 V, 30,0 × 31,0 × 6,0 max, circuit de protection intégré, 2 fils de 20 mm soudés sur la carte mère. Charge max 250 mA.</span></td></tr>
+      <tr><td class="n">11</td><td>Coque arrière <span class="tag mes">Sur mesure</span></td><td>ABS noir mat 41 × 41 × 5, angles R8, arête arrière R4, fond 2,0. Plan de joint à 36 mm de l'avant. 4 vis M2 × 8 tête fraisée dans les inserts laiton M2 de la coque avant.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="lede" style="margin-top:14px">Banc d'essai : carte ST <span class="ref">X-NUCLEO-NFC08A1</span> (ST25R3916B, antenne 47 × 34 mm déjà accordée) branchée à la XIAO et à l'écran, pour écrire le logiciel pendant la fabrication de l'antenne sur mesure.</p>
+</section>
+
+<section class="cols2">
+  <div class="sheet">
+    <span class="label">Empilage · contrôlé par check_fit.py</span>
+    <h2>Profondeur depuis la face avant</h2>
+    <div class="tbl">
+    <table>
+      <thead><tr><th>De</th><th>À</th><th>Élément</th></tr></thead>
+      <tbody class="mono">
+        <tr><td>0,00</td><td>1,00</td><td>Vitre (1)</td></tr>
+        <tr><td>1,00</td><td>2,40</td><td>Écran OLED (5), collé à la vitre, dans l'ouverture du rebord</td></tr>
+        <tr><td>2,40</td><td>2,70</td><td>Antenne + ferrite (2)</td></tr>
+        <tr><td>2,80</td><td>4,00</td><td>Châssis (6)</td></tr>
+        <tr><td>5,29</td><td>9,50</td><td>XIAO (8), jeu de 1,29 avec le châssis</td></tr>
+        <tr><td>9,60</td><td>11,20</td><td>Carte mère (7)</td></tr>
+        <tr><td>11,70</td><td>17,70</td><td>Batterie (10)</td></tr>
+        <tr><td>17,70</td><td>39,00</td><td>Volume libre (21,3 mm)</td></tr>
+        <tr><td>32,00</td><td>39,00</td><td>Bossages de vis (±14 mm)</td></tr>
+        <tr><td>36,00</td><td>41,00</td><td>Coque arrière (11), fond de 39 à 41</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="margin-top:12px">Centre de l'USB-C à 6,9 mm de la face avant. Jeux mini : écran / ouverture 0,20, châssis / antenne 0,10, carte mère / batterie 0,50.</p>
+  </div>
+
+  <div class="sheet">
+    <span class="label">Électronique</span>
+    <h2>Brochage (XIAO ESP32S3)</h2>
+    <p class="lede">Correspondance broches / GPIO tirée du wiki Seeed. L'écran et le NFC partagent le bus SPI.</p>
+    <div class="tbl">
+    <table>
+      <thead><tr><th>Broche</th><th>Signal</th><th>Vers</th></tr></thead>
+      <tbody class="mono">
+        <tr><td>D8 · GPIO7</td><td>SCK</td><td>écran + NFC</td></tr>
+        <tr><td>D10 · GPIO9</td><td>MOSI</td><td>écran + NFC</td></tr>
+        <tr><td>D9 · GPIO8</td><td>MISO</td><td>NFC</td></tr>
+        <tr><td>D0 · GPIO1</td><td>CS écran</td><td>écran</td></tr>
+        <tr><td>D1 · GPIO2</td><td>DC</td><td>écran</td></tr>
+        <tr><td>D2 · GPIO3</td><td>RESET</td><td>écran</td></tr>
+        <tr><td>D6 · GPIO43</td><td>Rétroéclairage (PWM)</td><td>prototype IPS ; libre avec l'OLED</td></tr>
+        <tr><td>D3 · GPIO4</td><td>CS NFC</td><td>ST25R3916B</td></tr>
+        <tr><td>D7 · GPIO44</td><td>IRQ NFC</td><td>ST25R3916B</td></tr>
+        <tr><td>D5 · GPIO6</td><td>Tension batterie (ADC)</td><td>pont diviseur</td></tr>
+        <tr><td>D4 · GPIO5</td><td>libre</td><td>buzzer ou vibreur</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="margin-top:12px">Le ST25R3916B est alimenté par la batterie (2,4 à 5,5 V) et ses entrées/sorties en 3,3 V (plage 1,65 à 5,5 V). Seeed ne relie la batterie à aucune broche : le pont diviseur sur D5 est sur la carte mère.</p>
+  </div>
+</section>
+
+<section class="cols2">
+  <div class="sheet">
+    <span class="label">Avant de lancer l'outillage</span>
+    <h2>Points à valider</h2>
+    <ol class="checks">
+      <li><b>Dalle sur mesure.</b> Envoyer le cahier des charges de l'écran (ligne 5) à des fabricants de dalles OLED : faisabilité de la nappe repliée, outillage, minimum de commande, délai.</li>
+      <li><b>Portée NFC à travers l'écran.</b> Mesurer avec une dalle sans métal au dos, vitre en place. Objectif : 4 cm. Repli : antenne sur la face arrière.</li>
+      <li><b>Écran du prototype.</b> Datasheet ER-TFT1.54-1 à récupérer à la main (le site BuyDisplay bloque le téléchargement automatique) : position de la zone active, broches, longueur de la nappe.</li>
+      <li><b>Batterie.</b> La fiche LP603030 ne précise pas si les 31 mm incluent le circuit de protection. Même à 34 mm, elle loge.</li>
+      <li><b>USB-C.</b> Vérifier l'enfichage d'un vrai câble sur une coque imprimée.</li>
+      <li><b>Autonomie.</b> Mesurer la consommation réelle. Les 21 mm libres permettent une batterie plus épaisse.</li>
+    </ol>
+  </div>
+
+  <div class="sheet">
+    <span class="label">Paiement</span>
+    <h2>Deux façons d'encaisser</h2>
+    <h3>A. Lien de paiement · réalisable tout de suite</h3>
+    <p>Le cube affiche un QR code et, en émulation de carte NFC-A, transmet le même lien au téléphone du client. Le client paie chez Stripe ou SumUp. Le cube ne voit jamais de numéro de carte : pas de certification bancaire.</p>
+    <h3>B. Lecture directe des cartes sans contact</h3>
+    <p>Le ST25R3916B est conforme EMVCo 3.1a pour la partie radio. Il faut en plus un logiciel de paiement certifié (noyau EMV L2) et une certification de sécurité PCI. Plusieurs mois avec un laboratoire agréé.</p>
+  </div>
+</section>
+
+<section class="sheet">
+  <span class="label">Série</span>
+  <h2>Version de série (révision C)</h2>
+  <p>La XIAO est remplacée par ses composants, soudés sur la carte mère :
+  <span class="ref mono">Espressif ESP32-S3-MINI-1-N8</span> (15,4 × 20,5 × 2,4),
+  <span class="ref mono">GCT USB4105-GF-A</span> (USB-C 2.0, 16 contacts),
+  <span class="ref mono">Microchip MCP73831T-2ACI/OT</span> (chargeur SOT-23-5 jusqu'à 500 mA). Le reste ne change pas.</p>
+</section>
+
+<section class="sheet">
+  <span class="label">Sources</span>
+  <ul class="sources">
+    <li><a href="https://www.buydisplay.com/1-54-inch-tft-lcd-display-ips-panel-screen-240x240-for-smart-watch">BuyDisplay ER-TFT1.54-1</a></li>
+    <li><a href="https://www.buydisplay.com/download/manual/ER-TFT1.54-1_Datasheet.pdf">Datasheet ER-TFT1.54-1</a></li>
+    <li><a href="https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/">Seeed XIAO ESP32S3 (wiki, modèle 3D, brochage)</a></li>
+    <li><a href="https://www.st.com/resource/en/datasheet/st25r3916b.pdf">Datasheet ST25R3916B (DS13541)</a></li>
+    <li><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/ST25R3916B-AQWT/16516567">ST25R3916B-AQWT chez DigiKey</a></li>
+    <li><a href="https://www.st.com/en/evaluation-tools/x-nucleo-nfc08a1.html">ST X-NUCLEO-NFC08A1</a></li>
+    <li><a href="https://www.lipobattery.us/lipo-battery-lp603030-3-7v-500mah-1-85wh-with-protection-circuit-and-wires-20mm/">Batterie LP603030</a></li>
+    <li><a href="https://us.rs-online.com/product/wurth-elektronik/364004/70996260/">Würth 364004</a></li>
+    <li><a href="https://documentation.espressif.com/esp32-s3-mini-1_mini-1u_datasheet_en.pdf">ESP32-S3-MINI-1 (datasheet)</a></li>
+    <li><a href="https://gct.co/connector/usb4105">GCT USB4105</a></li>
+  </ul>
+</section>
+
+</div>
+
+<script>
+(function () {
+  const f = (n) => Math.round(n * 100) / 100;
+  const EYE = ["..XXXX..", ".XXXXXX.", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX.."];
+  function dimH(x1, x2, y, text, ext1, ext2) {
+    let s = `<line x1="${x1}" y1="${ext1}" x2="${x1}" y2="${y + 4}" stroke="var(--dim)" stroke-width="0.6"/><line x1="${x2}" y1="${ext2}" x2="${x2}" y2="${y + 4}" stroke="var(--dim)" stroke-width="0.6"/>`;
+    s += `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--dim)" stroke-width="0.8" marker-start="url(#ar)" marker-end="url(#ar)"/>`;
+    s += `<text class="dimt" x="${(x1 + x2) / 2}" y="${y - 5}" text-anchor="middle">${text}</text>`;
+    return s;
+  }
+  function dimV(y1, y2, x, text, ext1, ext2) {
+    let s = `<line x1="${ext1}" y1="${y1}" x2="${x + 4}" y2="${y1}" stroke="var(--dim)" stroke-width="0.6"/><line x1="${ext2}" y1="${y2}" x2="${x + 4}" y2="${y2}" stroke="var(--dim)" stroke-width="0.6"/>`;
+    s += `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="var(--dim)" stroke-width="0.8" marker-start="url(#ar)" marker-end="url(#ar)"/>`;
+    s += `<text class="dimt" x="${x + 7}" y="${(y1 + y2) / 2 + 4}">${text}</text>`;
+    return s;
+  }
+  const defs = `<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" style="fill:var(--dim)"/></marker>
+    <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" style="fill:var(--abs)"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--paper)" stroke-opacity="0.35" stroke-width="1.2"/></pattern></defs>`;
+
+  /* ---------- Face avant ---------- */
+  (function () {
+    const k = 7, ox = 40, oy = 70, X = (mm) => ox + (mm + 20.5) * k, Yv = (mm) => oy + (20.5 - mm) * k;
+    let s = defs;
+    s += `<path d="M${X(-4)},${Yv(20.5)} C${X(-18)},${Yv(70)} ${X(18)},${Yv(70)} ${X(4)},${Yv(20.5)}" fill="none" stroke="var(--cable)" stroke-width="5" stroke-linecap="round" transform="translate(0 0)"/>`;
+    s += `<rect x="${X(-20.5)}" y="${Yv(20.5)}" width="${41 * k}" height="${41 * k}" rx="${8 * k}" style="fill:var(--abs)" stroke="var(--ink)" stroke-width="1"/>`;
+    s += `<rect x="${X(-18.5)}" y="${Yv(18.5)}" width="${37 * k}" height="${37 * k}" rx="${6 * k}" style="fill:var(--glass)" stroke="var(--ink-2)" stroke-width="0.6"/>`;
+    s += `<rect x="${X(-16.9)}" y="${Yv(16.9)}" width="${33.8 * k}" height="${33.8 * k}" rx="${4.5 * k}" style="fill:var(--lcd)" stroke="color-mix(in oklab, var(--pix) 25%, transparent)" stroke-width="0.6" stroke-dasharray="3 3"/>`;
+    const q = 33.6 / 27.72;
+    [-5.6, 5.6].forEach(ex => EYE.forEach((row, i) => [...row].forEach((c, j) => {
+      if (c === "X") s += `<rect x="${X((ex + (j - 3.5) * 1.05) * q - 0.475 * q)}" y="${Yv((-1 + (3.5 - i) * 1.05) * q + 0.475 * q)}" width="${0.95 * q * k}" height="${0.95 * q * k}" style="fill:var(--pix)"/>`;
+    })));
+    s += dimH(X(-20.5), X(20.5), Yv(-20.5) + 34, "41", Yv(-20.5) + 4, Yv(-20.5) + 4);
+    s += dimH(X(-18.5), X(18.5), Yv(-20.5) + 16, "37 vitre", Yv(-18.5) + 2, Yv(-18.5) + 2);
+    s += dimV(Yv(16.8), Yv(-16.8), X(20.5) + 22, "33,6", X(16.8) + 2, X(16.8) + 2);
+    s += dimV(Yv(20.5), Yv(18.5), X(-20.5) - 18, "2", X(-20.5) - 2, X(-18.5) - 2);
+    s += `<line x1="${X(0)}" y1="${Yv(20.5) - 12}" x2="${X(0)}" y2="${Yv(-20.5) + 8}" stroke="var(--dim)" stroke-width="0.8" stroke-dasharray="10 3 2 3"/>`;
+    s += `<text class="dimt" x="${X(0) + 6}" y="${Yv(-20.5) + 4}" style="font-weight:500">A</text>`;
+    s += `<text class="lbl-s" x="${X(10)}" y="${Yv(26)}">2 trous Ø1,8, entraxe 8</text>`;
+    const top = Yv(58), vbW = X(20.5) + 70, vbH = Yv(-20.5) + 50 - top;
+    document.getElementById("front").innerHTML = `<svg viewBox="0 ${top} ${vbW} ${vbH}" role="img" aria-label="Face avant cotée">${s}</svg>`;
+  })();
+
+  /* ---------- Coupe A-A ---------- */
+  (function () {
+    const k = 7.2, ox = 40, oy = 70, X = (d) => ox + d * k, Yv = (y) => oy + (20.5 - y) * k;
+    const r = (d0, d1, y0, y1, fill, extra = "") => `<rect x="${X(d0)}" y="${Yv(y1)}" width="${(d1 - d0) * k}" height="${(y1 - y0) * k}" style="fill:${fill}" stroke="var(--ink)" stroke-width="0.5" ${extra}/>`;
+    const poly = (pts, fill, extra = "") => `<polygon points="${pts.map(([d, y]) => X(d) + "," + Yv(y)).join(" ")}" style="fill:${fill}" stroke="var(--ink)" stroke-width="0.5" ${extra}/>`;
+    const rf = 1.5 * k, rb = 4 * k, L = X(0), Rr = X(41), Tp = Yv(20.5), Bt = Yv(-20.5);
+    const outline = `M${L + rf},${Tp} H${Rr - rb} A${rb},${rb} 0 0 1 ${Rr},${Tp + rb} V${Bt - rb} A${rb},${rb} 0 0 1 ${Rr - rb},${Bt} H${L + rf} A${rf},${rf} 0 0 1 ${L},${Bt - rf} V${Tp + rf} A${rf},${rf} 0 0 1 ${L + rf},${Tp} Z`;
+    let s = defs + `<clipPath id="cubeclip"><path d="${outline}"/></clipPath>`;
+    // dragonne et manchons (hors plan, x = ±4)
+    s += `<path d="M${X(19.6)},${Yv(20.5)} C${X(19.6)},${Yv(30)} ${X(21.4)},${Yv(30)} ${X(21.4)},${Yv(20.5)}" fill="none" stroke="var(--cable)" stroke-width="4"/>`;
+    s += r(18.75, 22.25, 14.5, 18.5, "none", 'stroke-dasharray="2 2"');
+    // coque
+    let g = "";
+    g += r(0, 41, 18.5, 20.5, "url(#hatch)");
+    g += poly([[0, -18.5], [4.0, -18.5], [4.0, -19.5], [5.1, -19.5], [5.1, -20.5], [0, -20.5]], "url(#hatch)");
+    g += poly([[8.7, -20.5], [8.7, -19.5], [11.0, -19.5], [11.0, -18.5], [41, -18.5], [41, -20.5]], "url(#hatch)");
+    g += r(1.0, 2.0, -18.5, -17.8, "url(#hatch)");
+    s += `<g clip-path="url(#cubeclip)">${g}</g>`;
+    s += `<g clip-path="url(#cubeclip)">${r(39, 41, -18.5, 18.5, "url(#hatch)")}</g>`;
+    s += `<path d="${outline}" fill="none" stroke="var(--ink)" stroke-width="1"/>`;
+    // plan de joint coque avant / coque arrière, bossages (hors plan)
+    s += `<line x1="${X(36)}" y1="${Yv(20.5) - 6}" x2="${X(36)}" y2="${Yv(18.5)}" stroke="var(--dim)" stroke-width="1"/><line x1="${X(36)}" y1="${Yv(-18.5)}" x2="${X(36)}" y2="${Yv(-20.5) + 6}" stroke="var(--dim)" stroke-width="1"/>`;
+    s += r(32, 39, 11.75, 16.25, "none", 'stroke-dasharray="3 2"') + r(32, 39, -16.25, -11.75, "none", 'stroke-dasharray="3 2"');
+    // empilage (valeurs de check_fit.py)
+    s += r(0, 1.0, -18.5, 18.5, "var(--glass)");
+    s += r(1.0, 2.4, -17.6, 18.3, "var(--lcd)");
+    s += r(2.4, 2.7, 15.5, 17.5, "var(--copper)") + r(2.4, 2.7, -17.5, -15.5, "var(--copper)");
+    s += r(2.8, 4.0, -18.3, 16.9, "var(--chassis)");
+    // nappe écran (dans le plan, x = ±6)
+    s += r(2.4, 8.2, 18.1, 18.3, "var(--copper)") + r(8.2, 8.4, 15.5, 18.3, "var(--copper)");
+    s += r(8.4, 9.6, 11.5, 15.5, "var(--chip)");
+    // XIAO : carte, blindage, USB-C (modèle 3D Seeed)
+    s += r(8.5, 9.5, -17.8, 3.15, "color-mix(in oklab, var(--pcb) 70%, var(--ink))");
+    s += r(6.5, 8.5, -11.09, -0.49, "var(--metal)");
+    s += r(5.29, 9.5, -19.33, -12.03, "var(--metal)");
+    s += r(6.54, 7.24, -18.63, -14.03, "var(--chip)");
+    s += `<line x1="${X(6.89)}" y1="${Yv(-20.5) + 4}" x2="${X(6.89)}" y2="${Yv(-13)}" stroke="var(--dim)" stroke-width="0.5" stroke-dasharray="4 2 1 2"/>`;
+    s += r(9.6, 11.2, -18.0, 17.5, "var(--pcb)");
+    s += r(11.2, 11.7, 14.5, 17.0, "var(--copper)");
+    s += r(11.7, 17.7, -16.5, 14.5, "var(--batt)");
+    const tag = (n, d, y, tx, ty) => `<line x1="${X(d)}" y1="${Yv(y)}" x2="${tx}" y2="${ty}" stroke="var(--ink-2)" stroke-width="0.6"/><circle cx="${tx}" cy="${ty}" r="8" style="fill:var(--sheet)" stroke="var(--ink)" stroke-width="0.8"/><text class="num" x="${tx}" y="${ty + 3.6}" text-anchor="middle">${n}</text>`;
+    s += tag(1, 0.5, 8, X(-4), Yv(8));
+    s += tag(5, 1.7, 4, X(-4), Yv(1));
+    s += tag(2, 2.55, -16.5, X(-4), Yv(-12));
+    s += tag(6, 3.4, -6, X(-4), Yv(-6));
+    s += tag(8, 7.4, -15, X(14), Yv(-27));
+    s += tag(7, 10.4, -8, X(24), Yv(-6));
+    s += tag(10, 14.7, 2, X(24), Yv(2));
+    s += tag(11, 40, 5, X(46), Yv(5));
+    s += tag(4, 21.4, 26, X(28), Yv(28));
+    s += tag(3, 30, 19.5, X(34), Yv(25));
+    s += dimH(X(0), X(41), Yv(-20.5) + 40, "41", Yv(-20.5) + 4, Yv(-20.5) + 4);
+    s += dimH(X(0), X(6.89), Yv(-20.5) + 20, "6,9", Yv(-20.5) + 2, Yv(-20.5) + 2);
+    s += dimV(Yv(16.8), Yv(-16.8), X(41) + 30, "33,6 image", X(2.4) + 2, X(2.4) + 2);
+    s += `<text class="lbl-s" x="${X(0)}" y="${Yv(-20.5) + 62}">COUPE A-A · avant à gauche</text>`;
+    const top = Yv(31), vbW = X(41) + 120, vbH = Yv(-20.5) + 70 - top;
+    document.getElementById("section").innerHTML = `<svg viewBox="0 ${top} ${vbW} ${vbH}" role="img" aria-label="Coupe A-A cotée">${s}</svg>`;
+  })();
+
+  /* ---------- Dessous ---------- */
+  (function () {
+    const k = 7, ox = 40, oy = 40, X = (x) => ox + (x + 20.5) * k, Yv = (d) => oy + d * k;
+    let s = defs;
+    const rf = 1.5 * k, rb = 4 * k, L = X(-20.5), Rr = X(20.5), Tp = Yv(0), Bt = Yv(41);
+    s += `<path d="M${L + rf},${Tp} H${Rr - rf} A${rf},${rf} 0 0 1 ${Rr},${Tp + rf} V${Bt - rb} A${rb},${rb} 0 0 1 ${Rr - rb},${Bt} H${L + rb} A${rb},${rb} 0 0 1 ${L},${Bt - rb} V${Tp + rf} A${rf},${rf} 0 0 1 ${L + rf},${Tp} Z" style="fill:var(--abs)" stroke="var(--ink)" stroke-width="1"/>`;
+    s += `<line x1="${L}" y1="${Yv(36)}" x2="${Rr}" y2="${Yv(36)}" stroke="var(--dim)" stroke-width="0.8" stroke-dasharray="5 3"/>`;
+    s += `<text class="lbl-s" x="${Rr + 8}" y="${Yv(36) + 4}">joint</text>`;
+    s += `<rect x="${X(-6.5)}" y="${Yv(4.0)}" width="${13 * k}" height="${7 * k}" rx="${0.8 * k}" fill="none" stroke="var(--ink-2)" stroke-width="0.7" stroke-dasharray="3 2"/>`;
+    s += `<rect x="${X(-4.8)}" y="${Yv(5.1)}" width="${9.6 * k}" height="${3.6 * k}" rx="${1.8 * k}" style="fill:var(--glass)" stroke="var(--ink)" stroke-width="0.8"/>`;
+    s += `<line x1="${X(-20.5)}" y1="${Yv(0)}" x2="${X(20.5)}" y2="${Yv(0)}" stroke="var(--ink)" stroke-width="2.5"/>`;
+    s += `<text class="lbl-s" x="${X(-20.5)}" y="${Yv(0) - 10}">face avant (écran)</text>`;
+    s += dimH(X(-4.8), X(4.8), Yv(41) + 18, "9,6", Yv(8.7) + 2, Yv(8.7) + 2);
+    s += dimV(Yv(5.1), Yv(8.7), X(20.5) + 20, "3,6", X(4.8) + 2, X(4.8) + 2);
+    s += dimV(Yv(0), Yv(6.9), X(20.5) + 56, "6,9", X(20.5) + 2, X(6) + 2);
+    s += `<line x1="${X(-6)}" y1="${Yv(6.9)}" x2="${X(6)}" y2="${Yv(6.9)}" stroke="var(--dim)" stroke-width="0.6" stroke-dasharray="6 2 1 2"/>`;
+    s += `<text class="lbl-s" x="${X(-20.5)}" y="${Yv(41) + 44}">USB-C de la XIAO · charge + programmation</text>`;
+    const vbW = X(20.5) + 100, vbH = Yv(41) + 56;
+    document.getElementById("bottom").innerHTML = `<svg viewBox="0 0 ${vbW} ${vbH}" role="img" aria-label="Vue de dessous cotée">${s}</svg>`;
+  })();
+})();
+</script>
+
+</body>
+</html>
