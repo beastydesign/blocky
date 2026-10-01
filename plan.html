@@ -30,7 +30,6 @@
   --copper: #c07a3e;
   --ferrite: #55585e;
   --batt: #9aa3ad;
-  --chassis: #6d747c;
   --foam: #d9c9a8;
   --cable: #3a3f45;
   --f-display: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -43,7 +42,7 @@
     --dim: #7ea2ff; --warn: #f0a46c; --ok: #6fcf97;
     --abs: #3a3e44; --glass: #07090c; --mask: #11151b; --lcd: #1a2430; --pix: #ffffff;
     --pcb: #2a7055; --chip: #0d0f12; --metal: #c4cad1; --copper: #d68a4c; --ferrite: #6a6e75;
-    --batt: #8d97a2; --chassis: #7c848d; --foam: #b8a887; --cable: #8a929b;
+    --batt: #8d97a2; --foam: #b8a887; --cable: #8a929b;
     color-scheme: dark;
   }
 }
@@ -52,7 +51,7 @@
   --dim: #7ea2ff; --warn: #f0a46c; --ok: #6fcf97;
   --abs: #3a3e44; --glass: #07090c; --mask: #11151b; --lcd: #1a2430; --pix: #ffffff;
   --pcb: #2a7055; --chip: #0d0f12; --metal: #c4cad1; --copper: #d68a4c; --ferrite: #6a6e75;
-  --batt: #8d97a2; --chassis: #7c848d; --foam: #b8a887; --cable: #8a929b;
+  --batt: #8d97a2; --foam: #b8a887; --cable: #8a929b;
   color-scheme: dark;
 }
 
@@ -117,94 +116,155 @@ a { color: var(--dim); }
 a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
 .sources { font-size: 13px; columns: 2 300px; column-gap: 28px; padding-left: 1.1em; margin: 0; }
 .sources li { break-inside: avoid; margin-bottom: 4px; }
+
+
+/* petits écrans : tout reste dans la largeur */
+.wrap { grid-template-columns: minmax(0, 1fr); }
+.wrap > *, header.title > * { min-width: 0; }
+@media (max-width: 640px) {
+  header.title { grid-template-columns: minmax(0, 1fr); }
+  .cartouche { grid-template-columns: auto minmax(0, 1fr); }
+  .sheet { padding: 16px; }
+}
+/* sélecteur de langue */
+span.i18n { padding: 0; margin: 0; border: 0; }
+.lang { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); right: 16px; z-index: 50; display: flex; border: 1px solid var(--rule); background: var(--sheet); }
+.lang button { all: unset; cursor: pointer; font-family: var(--f-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; padding: 6px 10px; color: var(--ink-2); }
+.lang button:hover { color: var(--ink); }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.lang button:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
 </style>
 
 </head>
 <body>
+<div class="lang" role="group" aria-label="Langue / Language"><button type="button" data-l="fr" aria-pressed="true">FR</button><button type="button" data-l="en" aria-pressed="false">EN</button></div>
 <div class="wrap">
 
 <header class="title">
   <div>
     <h1>Blocky</h1>
-    <p class="sub">Module de paiement sans contact : cube ABS noir de 41 mm, écran OLED carré bord à bord sous une vitre (image 33,6 mm), NFC derrière l'écran, recharge USB-C. Toutes les pièces logent dans le cube : encombrement contrôlé par script, aucune collision.</p>
+    <p class="sub"><span class="i18n" data-en="Contactless payment module: 41 mm black ABS cube, edge-to-edge square OLED screen under glass (33.6 mm image), NFC behind the screen, USB-C charging. Every part fits inside the cube: packaging checked by script, no collisions.">Module de paiement sans contact : cube ABS noir de 41 mm, écran OLED carré bord à bord sous une vitre (image 33,6 mm), NFC derrière l'écran, recharge USB-C. Toutes les pièces logent dans le cube : encombrement contrôlé par script, aucune collision.</span></p>
   </div>
-  <div class="cartouche">
+  <div class="i18n cartouche" data-en="
+    &lt;span&gt;Cube&lt;/span&gt;&lt;b&gt;41 × 41 × 41 mm&lt;/b&gt;
+    &lt;span&gt;Screen&lt;/span&gt;&lt;b&gt;Square OLED · 33.6 image&lt;/b&gt;
+    &lt;span&gt;Revision&lt;/span&gt;&lt;b&gt;D · edge to edge&lt;/b&gt;
+    &lt;span&gt;Date&lt;/span&gt;&lt;b&gt;1 Oct 2026&lt;/b&gt;
+    &lt;span&gt;Units&lt;/span&gt;&lt;b&gt;mm&lt;/b&gt;
+  ">
     <span>Cube</span><b>41 × 41 × 41 mm</b>
     <span>Écran</span><b>OLED carré · image 33,6</b>
-    <span>Révision</span><b>C · bord à bord</b>
+    <span>Révision</span><b>D · bord à bord</b>
     <span>Date</span><b>01/10/2026</b>
     <span>Unités</span><b>mm</b>
   </div>
 </header>
 
 <section class="sheet">
-  <span class="label">Plans cotés</span>
-  <h2>Face avant, coupe A-A, dessous</h2>
-  <p class="lede">Cotes en mm. La coupe A-A passe par le milieu du cube, l'avant est à gauche. Les éléments en pointillés sont hors du plan de coupe. Vue éclatée interactive, avec les cotes de chaque pièce : <a href="index.html">Blocky Blueprint</a>.</p>
+  <span class="i18n" data-en="&lt;span class=&quot;label&quot;&gt;Dimensioned drawings&lt;/span&gt;"><span class="label">Plans cotés</span></span>
+  <span class="i18n" data-en="&lt;h2&gt;Front, section A-A, underside&lt;/h2&gt;"><h2>Face avant, coupe A-A, dessous</h2></span>
+  <p class="lede"><span class="i18n" data-en="Dimensions in mm. Section A-A runs through the middle of the cube, front on the left. Dashed items lie outside the section plane. Interactive exploded view with every part&#x27;s dimensions: &lt;a href=&quot;index.html&quot;&gt;Blocky Blueprint&lt;/a&gt;.">Cotes en mm. La coupe A-A passe par le milieu du cube, l'avant est à gauche. Les éléments en pointillés sont hors du plan de coupe. Vue éclatée interactive, avec les cotes de chaque pièce : <a href="index.html">Blocky Blueprint</a>.</span></p>
   <div class="views">
-    <figure><div class="svgbox" id="front"></div><figcaption>Face avant. Angles R8 comme une GoPro, rebord ABS de 2 mm. L'image carrée de 33,6 mm remplit la vitre : il reste 1,6 mm de bord noir.</figcaption></figure>
-    <figure><div class="svgbox" id="section"></div><figcaption>Coupe A-A. Vitre et écran OLED collés ensemble, antenne NFC juste derrière. La nappe repliée passe par le haut, au-dessus du châssis. Il reste 21 mm libres derrière la batterie.</figcaption></figure>
-    <figure><div class="svgbox" id="bottom"></div><figcaption>Dessous. USB-C centré, bouche à 1,17 mm de la surface grâce à une paroi amincie à 1,0 mm.</figcaption></figure>
+    <figure><div class="svgbox" id="front"></div><figcaption><span class="i18n" data-en="Front. R8 corners like a GoPro, 2 mm ABS rim. The 33.6 mm square image fills the glass, leaving a 1.6 mm black border.">Face avant. Angles R8 comme une GoPro, rebord ABS de 2 mm. L'image carrée de 33,6 mm remplit la vitre : il reste 1,6 mm de bord noir.</span></figcaption></figure>
+    <figure><div class="svgbox" id="section"></div><figcaption><span class="i18n" data-en="Section A-A. Glass and OLED screen bonded together, NFC antenna right behind. The folded flex runs over the top. The battery is held by 4 back-shell posts through a foam pad. 20 mm stays free behind.">Coupe A-A. Vitre et écran OLED collés ensemble, antenne NFC juste derrière. La nappe repliée passe par le haut. La batterie est plaquée par 4 colonnettes de la coque arrière, à travers une mousse. Il reste 20 mm libres derrière.</span></figcaption></figure>
+    <figure><div class="svgbox" id="bottom"></div><figcaption><span class="i18n" data-en="Underside. Centred USB-C, opening 1.17 mm from the surface thanks to a wall thinned to 1.0 mm.">Dessous. USB-C centré, bouche à 1,17 mm de la surface grâce à une paroi amincie à 1,0 mm.</span></figcaption></figure>
   </div>
 </section>
 
 <section class="sheet">
-  <span class="label">Nomenclature · prototype</span>
-  <h2>Pièces et références</h2>
-  <p class="lede"><span class="tag std">Catalogue</span> s'achète tel quel. <span class="tag mes">Sur mesure</span> se fabrique d'après ce plan.</p>
+  <span class="i18n" data-en="&lt;span class=&quot;label&quot;&gt;Bill of materials · prototype&lt;/span&gt;"><span class="label">Nomenclature · prototype</span></span>
+  <span class="i18n" data-en="&lt;h2&gt;Parts and references&lt;/h2&gt;"><h2>Pièces et références</h2></span>
+  <p class="lede"><span class="i18n" data-en="&lt;span class=&quot;tag std&quot;&gt;Off the shelf&lt;/span&gt; is bought as is. &lt;span class=&quot;tag mes&quot;&gt;Custom&lt;/span&gt; is made from this drawing."><span class="tag std">Catalogue</span> s'achète tel quel. <span class="tag mes">Sur mesure</span> se fabrique d'après ce plan.</span></p>
   <div class="tbl">
   <table>
-    <thead><tr><th>#</th><th>Pièce</th><th>Référence et cotes</th></tr></thead>
-    <tbody>
-      <tr><td class="n">1</td><td>Vitre de façade <span class="tag mes">Sur mesure</span></td><td>Verre trempé 37,0 × 37,0 × 1,0, coins R6. Sérigraphie noire, fenêtre 33,8 × 33,8 aux coins R4,5, centrée : bord noir visible de 1,6 mm. L'écran y est collé en usine (lamination optique).<span class="meta">Prototype : PMMA 1 mm découpé au laser et masque en vinyle noir.</span></td></tr>
-      <tr><td class="n">2</td><td>Antenne NFC + ferrite <span class="tag mes">Sur mesure</span></td><td>Circuit souple 2 couches 0,11 mm, 4 spires, anneau 35 × 35 extérieur (coins R5), 31 × 31 intérieur (coins R3), juste derrière l'écran. Queue de 4 mm en haut à droite. Ferrite <span class="ref">Würth 364004</span> (WE-FSFS 60 × 60 × 0,1) découpée en cadre, côté carte mère.</td></tr>
-      <tr><td class="n">3</td><td>Coque avant <span class="tag mes">Sur mesure</span></td><td>ABS noir mat, 41 × 41 × 36, angles R8 vus de face (comme une GoPro), arête avant R1,5 autour de la vitre, parois 2,0. Logement de vitre 37,2 × 37,2 × 1,0, coins R6,1. Ouverture écran 35,6 × 35,6, coins R5,2, encoche de 12,4 en haut pour la nappe repliée. 4 bossages Ø4,5 à ±14 mm avec inserts laiton M2. Lumière USB-C 9,6 × 3,6 centrée sous le cube.<span class="meta">Prototype : SLA ou MJF. Série : injection ABS, texture mate.</span></td></tr>
-      <tr><td class="n">4</td><td>Dragonne</td><td>Câble inox 7×7 Ø1,5 gainé nylon noir, boucle de 37 mm. 2 trous Ø1,8 au centre du dessus, entraxe 8. 2 manchons aluminium sertis à l'intérieur comme butées.</td></tr>
-      <tr><td class="n">5</td><td>Écran bord à bord <span class="tag mes">Sur mesure</span></td><td>Dalle AMOLED carrée, image 33,6 × 33,6 centrée aux coins R4,3, encombrement max 35,2 × 35,2 × 1,4, coins R5, bords de 0,8. Nappe de 12 mm au milieu du bord haut, repliée derrière (dépasse de 0,7). 240 × 240 minimum, 400 × 400 conseillé. SPI 4 fils en 3,3 V. Alimentation OLED intégrée à la nappe, entrée 3,3 V unique. Sans feuille métallique au dos. 400 cd/m² minimum, −20 à +70 °C.<span class="meta">Aucun écran carré de cette taille en catalogue : outillage et minimum de commande à chiffrer. Prototype : <span class="ref">BuyDisplay ER-TFT1.54-1</span>, IPS 240 × 240 ST7789, image 27,72 mm, dalle 31,52 × 33,72 × 1,9.</span></td></tr>
-      <tr><td class="n">6</td><td>Châssis <span class="tag mes">Sur mesure</span></td><td>Plaque PC/ABS 36,6 × 35,2 × 1,2, coins R5,8 en bas et R4,4 en haut, arrêtée 1,6 mm sous le haut de la coque pour laisser passer la nappe et la queue d'antenne. Plaque l'antenne contre l'écran.</td></tr>
-      <tr><td class="n">7</td><td>Carte mère <span class="tag mes">Sur mesure</span></td><td>FR4 4 couches 35 × 35,5 × 1,6, coins R5 / R5,3. Face avant : XIAO centrée en bas, connecteur ZIF de l'écran en haut, ST25R3916B avec quartz 27,12 MHz et circuit d'accord à droite, connecteur d'antenne en haut à droite. Face arrière : 2 pastilles BAT+ / BAT− pour les fils de la batterie.</td></tr>
-      <tr><td class="n">8</td><td>Microcontrôleur + USB-C <span class="tag std">Catalogue</span></td><td><span class="ref">Seeed XIAO ESP32S3 · 113991114</span><span class="meta">20,95 × 17,78 × 4,21 avec l'USB-C (mesuré sur le modèle 3D officiel Seeed). ESP32-S3, 8 Mo PSRAM, 8 Mo flash, WiFi + BLE 5.0, chargeur LiPo 100 mA. Soudée à plat par ses bords crénelés.</span></td></tr>
-      <tr><td class="n">9</td><td>Lecteur NFC <span class="tag std">Catalogue</span></td><td><span class="ref">ST ST25R3916B-AQWT</span><span class="meta">VFQFPN-32, 5 × 5 × 1,0. Alimentation 2,4 à 5,5 V. Conforme EMVCo 3.1a. Émulation de carte NFC-A et FeliCa. Quartz 27,12 MHz. Circuit d'accord recopié de la carte ST X-NUCLEO-NFC08A1.</span></td></tr>
-      <tr><td class="n">10</td><td>Batterie <span class="tag std">Catalogue</span></td><td><span class="ref">LP603030 · 500 mAh</span> chez lipobattery.us<span class="meta">LiPo 3,7 V, 30,0 × 31,0 × 6,0 max, circuit de protection intégré, 2 fils de 20 mm soudés sur la carte mère. Charge max 250 mA.</span></td></tr>
-      <tr><td class="n">11</td><td>Coque arrière <span class="tag mes">Sur mesure</span></td><td>ABS noir mat 41 × 41 × 5, angles R8, arête arrière R4, fond 2,0. Plan de joint à 36 mm de l'avant. 4 vis M2 × 8 tête fraisée dans les inserts laiton M2 de la coque avant.</td></tr>
+    <thead class="i18n" data-en="&lt;tr&gt;&lt;th&gt;#&lt;/th&gt;&lt;th&gt;Part&lt;/th&gt;&lt;th&gt;Reference and dimensions&lt;/th&gt;&lt;/tr&gt;"><tr><th>#</th><th>Pièce</th><th>Référence et cotes</th></tr></thead>
+    <tbody class="i18n" data-en="
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;1&lt;/td&gt;&lt;td&gt;Front glass &lt;span class=&quot;tag mes&quot;&gt;Custom&lt;/span&gt;&lt;/td&gt;&lt;td&gt;Chemically strengthened aluminosilicate glass 37.0 × 37.0 × 1.0, R6 corners, 0.15 chamfers. Black screen print, 33.8 × 33.8 window with R4.5 corners, centred: 1.6 mm visible black border. Bonded with a 0.17 &lt;span class=&quot;ref&quot;&gt;3M 9495LE&lt;/span&gt; adhesive frame, cut over 12.4 at the flex exit.&lt;span class=&quot;meta&quot;&gt;Prototype: laser-cut 1 mm PMMA with a black vinyl mask.&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;2&lt;/td&gt;&lt;td&gt;NFC antenna + ferrite &lt;span class=&quot;tag mes&quot;&gt;Custom&lt;/span&gt;&lt;/td&gt;&lt;td&gt;2-layer 0.11 polyimide, 4 turns, ring 35 × 35 (R5 corners) / 31 × 31 (R3 corners). 4 mm tail at x = +7 to +11. &lt;span class=&quot;ref&quot;&gt;Würth 364004&lt;/span&gt; ferrite (WE-FSFS, 0.1 + 0.05 adhesive) cut to a frame: the antenna bonds to the back of the screen.&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;3&lt;/td&gt;&lt;td&gt;Front shell &lt;span class=&quot;tag mes&quot;&gt;Custom&lt;/span&gt;&lt;/td&gt;&lt;td&gt;Matte black ABS, 41 × 41 × 36, R8 corners seen from the front, R1.5 front edge, 2.0 walls. Glass pocket 37.2 × 37.2 × 1.17, R6.1 corners. Screen opening 35.6 × 35.6, R5.2 corners, 12.4 notch at the top. 2 stops and 2 Ø1.4 pins for the main board. 4 snap grooves. 9.6 × 3.6 USB-C opening and inner channel up to the parting line.&lt;span class=&quot;meta&quot;&gt;Prototype: SLA or MJF. Production: injection-moulded ABS, matte texture, draft added by the toolmaker.&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;4&lt;/td&gt;&lt;td&gt;Lanyard&lt;/td&gt;&lt;td&gt;Ø1.5 7×7 stainless cable, black nylon coated, 90 mm (81 mm visible loop). 2 × Ø1.8 holes centred on top, 8 mm apart. 2 crimped Ø3.5 × 2.5 aluminium ferrules inside.&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;5&lt;/td&gt;&lt;td&gt;Edge-to-edge screen &lt;span class=&quot;tag mes&quot;&gt;Custom&lt;/span&gt;&lt;/td&gt;&lt;td&gt;Square AMOLED panel, 33.6 × 33.6 centred image with R4.3 corners, max envelope 35.2 × 35.2 × 1.4, R5 corners, 0.8 borders. 12 mm flex in the middle of the top edge, folded behind with a service loop. 240 × 240 minimum, 400 × 400 recommended. 4-wire SPI at 3.3 V. OLED supplies built into the flex. No metal on the back. Laminated to the glass. 400 cd/m² minimum, −20 to +70 °C.&lt;span class=&quot;meta&quot;&gt;No square screen this size off the shelf: RFQ to send. Prototype: &lt;span class=&quot;ref&quot;&gt;BuyDisplay ER-TFT1.54-1&lt;/span&gt;, 240 × 240 IPS ST7789, 27.72 image offset 1.55 on its 31.52 × 33.72 × 1.9 panel, 12-pin solder flex at 0.7 pitch.&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;6&lt;/td&gt;&lt;td&gt;Main board &lt;span class=&quot;tag mes&quot;&gt;Custom&lt;/span&gt;&lt;/td&gt;&lt;td&gt;4-layer FR4 35 × 35.5 × 1.6, ENIG, R5 / R5.3 corners. 12.4 notch at the top, 2 × Ø1.5 locating holes. Front: XIAO centred at the bottom, flex connector at the top, ST25R3916B, 27.12 MHz crystal and matching network on the right, antenna connector top right. Back: BAT+ / BAT− pads.&lt;span class=&quot;meta&quot;&gt;Schematic and layout to do.&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;7&lt;/td&gt;&lt;td&gt;Microcontroller + USB-C &lt;span class=&quot;tag std&quot;&gt;Off the shelf&lt;/span&gt;&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;ref&quot;&gt;Seeed XIAO ESP32S3 · 113991114&lt;/span&gt;&lt;span class=&quot;meta&quot;&gt;20.95 × 17.78 × 4.21 including USB-C (official Seeed 3D model). ESP32-S3, 8 MB PSRAM, 8 MB flash, WiFi + BLE 5.0, 100 mA LiPo charger. Soldered flat by its castellated edges.&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;8&lt;/td&gt;&lt;td&gt;NFC reader &lt;span class=&quot;tag std&quot;&gt;Off the shelf&lt;/span&gt;&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;ref&quot;&gt;ST ST25R3916B-AQWT&lt;/span&gt;&lt;span class=&quot;meta&quot;&gt;VFQFPN-32, 5 × 5 × 1.0. 2.4 to 5.5 V supply. EMVCo 3.1a compliant. NFC-A and FeliCa card emulation. 27.12 MHz crystal. Matching network copied from the ST X-NUCLEO-NFC08A1 board.&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;9&lt;/td&gt;&lt;td&gt;Battery + foam &lt;span class=&quot;tag std&quot;&gt;Off the shelf&lt;/span&gt;&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;ref&quot;&gt;LP603030 · 500 mAh&lt;/span&gt; from lipobattery.us, &lt;span class=&quot;ref&quot;&gt;Rogers PORON 4701-30&lt;/span&gt; foam&lt;span class=&quot;meta&quot;&gt;3.7 V LiPo, 30.0 × 31.0 × 6.0 max, built-in protection, 2 × 20 mm wires soldered to the board. 26 × 27 foam on its back, compressed to 1.0 by the posts.&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td class=&quot;n&quot;&gt;10&lt;/td&gt;&lt;td&gt;Back shell &lt;span class=&quot;tag mes&quot;&gt;Custom&lt;/span&gt;&lt;/td&gt;&lt;td&gt;Matte black ABS 41 × 41 × 5, R8 corners, R4 back edge, 2.0 floor. Locating tongue, 4 × 6.5 snaps (no screws), 4 × Ø4 posts that hold the battery. Parting line 36 mm from the front.&lt;/td&gt;&lt;/tr&gt;
+    ">
+      <tr><td class="n">1</td><td>Vitre de façade <span class="tag mes">Sur mesure</span></td><td>Verre aluminosilicate trempé chimiquement 37,0 × 37,0 × 1,0, coins R6, chanfreins 0,15. Sérigraphie noire, fenêtre 33,8 × 33,8 aux coins R4,5, centrée : bord noir visible de 1,6 mm. Collée par un cadre d'adhésif <span class="ref">3M 9495LE</span> de 0,17, coupé sur 12,4 à la sortie de nappe.<span class="meta">Prototype : PMMA 1 mm découpé au laser et masque en vinyle noir.</span></td></tr>
+      <tr><td class="n">2</td><td>Antenne NFC + ferrite <span class="tag mes">Sur mesure</span></td><td>Polyimide 2 couches 0,11, 4 spires, anneau 35 × 35 (coins R5) / 31 × 31 (coins R3). Queue de 4 mm à x = +7 à +11. Ferrite <span class="ref">Würth 364004</span> (WE-FSFS, 0,1 + 0,05 d'adhésif) découpée en cadre : l'antenne se colle au dos de l'écran.</td></tr>
+      <tr><td class="n">3</td><td>Coque avant <span class="tag mes">Sur mesure</span></td><td>ABS noir mat, 41 × 41 × 36, angles R8 vus de face, arête avant R1,5, parois 2,0. Logement de vitre 37,2 × 37,2 × 1,17, coins R6,1. Ouverture écran 35,6 × 35,6, coins R5,2, encoche de 12,4 en haut. 2 butées et 2 pions Ø1,4 pour la carte mère. 4 gorges de clips. Lumière USB-C 9,6 × 3,6 et rainure intérieure jusqu'au joint.<span class="meta">Prototype : SLA ou MJF. Série : injection ABS, texture mate, dépouilles ajoutées par le mouliste.</span></td></tr>
+      <tr><td class="n">4</td><td>Dragonne</td><td>Câble inox 7×7 Ø1,5 gainé nylon noir, 90 mm (boucle visible de 81 mm). 2 trous Ø1,8 au centre du dessus, entraxe 8. 2 manchons aluminium Ø3,5 × 2,5 sertis à l'intérieur.</td></tr>
+      <tr><td class="n">5</td><td>Écran bord à bord <span class="tag mes">Sur mesure</span></td><td>Dalle AMOLED carrée, image 33,6 × 33,6 centrée aux coins R4,3, encombrement max 35,2 × 35,2 × 1,4, coins R5, bords de 0,8. Nappe de 12 mm au milieu du bord haut, repliée derrière avec boucle de service. 240 × 240 minimum, 400 × 400 conseillé. SPI 4 fils en 3,3 V. Alimentation OLED intégrée à la nappe. Sans métal au dos. Laminée sur la vitre. 400 cd/m² minimum, −20 à +70 °C.<span class="meta">Aucun écran carré de cette taille en catalogue : appel d'offres à lancer. Prototype : <span class="ref">BuyDisplay ER-TFT1.54-1</span>, IPS 240 × 240 ST7789, image 27,72 décalée de 1,55 sur sa dalle 31,52 × 33,72 × 1,9, nappe 12 broches à souder au pas de 0,7.</span></td></tr>
+      <tr><td class="n">6</td><td>Carte mère <span class="tag mes">Sur mesure</span></td><td>FR4 4 couches 35 × 35,5 × 1,6, ENIG, coins R5 / R5,3. Échancrure de 12,4 en haut, 2 trous Ø1,5 de centrage. Face avant : XIAO centrée en bas, connecteur de nappe en haut, ST25R3916B, quartz 27,12 MHz et circuit d'accord à droite, connecteur d'antenne en haut à droite. Face arrière : pastilles BAT+ / BAT−.<span class="meta">Schéma et routage à faire.</span></td></tr>
+      <tr><td class="n">7</td><td>Microcontrôleur + USB-C <span class="tag std">Catalogue</span></td><td><span class="ref">Seeed XIAO ESP32S3 · 113991114</span><span class="meta">20,95 × 17,78 × 4,21 avec l'USB-C (modèle 3D officiel Seeed). ESP32-S3, 8 Mo PSRAM, 8 Mo flash, WiFi + BLE 5.0, chargeur LiPo 100 mA. Soudée à plat par ses bords crénelés.</span></td></tr>
+      <tr><td class="n">8</td><td>Lecteur NFC <span class="tag std">Catalogue</span></td><td><span class="ref">ST ST25R3916B-AQWT</span><span class="meta">VFQFPN-32, 5 × 5 × 1,0. Alimentation 2,4 à 5,5 V. Conforme EMVCo 3.1a. Émulation de carte NFC-A et FeliCa. Quartz 27,12 MHz. Circuit d'accord recopié de la carte ST X-NUCLEO-NFC08A1.</span></td></tr>
+      <tr><td class="n">9</td><td>Batterie + mousse <span class="tag std">Catalogue</span></td><td><span class="ref">LP603030 · 500 mAh</span> chez lipobattery.us, mousse <span class="ref">Rogers PORON 4701-30</span><span class="meta">LiPo 3,7 V, 30,0 × 31,0 × 6,0 max, protection intégrée, 2 fils de 20 mm soudés sur la carte. Mousse de 26 × 27 au dos, comprimée à 1,0 par les colonnettes.</span></td></tr>
+      <tr><td class="n">10</td><td>Coque arrière <span class="tag mes">Sur mesure</span></td><td>ABS noir mat 41 × 41 × 5, angles R8, arête arrière R4, fond 2,0. Languette d'emboîtement, 4 clips de 6,5 (sans vis), 4 colonnettes Ø4 qui plaquent la batterie. Plan de joint à 36 mm de l'avant.</td></tr>
     </tbody>
   </table>
   </div>
-  <p class="lede" style="margin-top:14px">Banc d'essai : carte ST <span class="ref">X-NUCLEO-NFC08A1</span> (ST25R3916B, antenne 47 × 34 mm déjà accordée) branchée à la XIAO et à l'écran, pour écrire le logiciel pendant la fabrication de l'antenne sur mesure.</p>
+  <p class="lede" style="margin-top:14px"><span class="i18n" data-en="Test bench: ST &lt;span class=&quot;ref&quot;&gt;X-NUCLEO-NFC08A1&lt;/span&gt; board (ST25R3916B, pre-tuned 47 × 34 mm antenna) wired to the XIAO and the screen, to write the software while the custom antenna is being made.">Banc d'essai : carte ST <span class="ref">X-NUCLEO-NFC08A1</span> (ST25R3916B, antenne 47 × 34 mm déjà accordée) branchée à la XIAO et à l'écran, pour écrire le logiciel pendant la fabrication de l'antenne sur mesure.</span></p>
 </section>
 
 <section class="cols2">
   <div class="sheet">
-    <span class="label">Empilage · contrôlé par check_fit.py</span>
-    <h2>Profondeur depuis la face avant</h2>
+    <span class="i18n" data-en="&lt;span class=&quot;label&quot;&gt;Stack-up · checked in CAD on real solids&lt;/span&gt;"><span class="label">Empilage · contrôlé en CAO sur volumes réels</span></span>
+    <span class="i18n" data-en="&lt;h2&gt;Depth from the front face&lt;/h2&gt;"><h2>Profondeur depuis la face avant</h2></span>
     <div class="tbl">
     <table>
-      <thead><tr><th>De</th><th>À</th><th>Élément</th></tr></thead>
-      <tbody class="mono">
+      <thead class="i18n" data-en="&lt;tr&gt;&lt;th&gt;From&lt;/th&gt;&lt;th&gt;To&lt;/th&gt;&lt;th&gt;Item&lt;/th&gt;&lt;/tr&gt;"><tr><th>De</th><th>À</th><th>Élément</th></tr></thead>
+      <tbody class="i18n mono" data-en="
+        &lt;tr&gt;&lt;td&gt;0.00&lt;/td&gt;&lt;td&gt;1.00&lt;/td&gt;&lt;td&gt;Glass (1)&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;1.00&lt;/td&gt;&lt;td&gt;1.17&lt;/td&gt;&lt;td&gt;3M 9495LE adhesive, on the rim&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;1.00&lt;/td&gt;&lt;td&gt;2.40&lt;/td&gt;&lt;td&gt;OLED screen (5), laminated to the glass, in the rim opening&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;2.40&lt;/td&gt;&lt;td&gt;2.70&lt;/td&gt;&lt;td&gt;Antenna + ferrite (2), bonded to the back of the screen&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;5.29&lt;/td&gt;&lt;td&gt;9.50&lt;/td&gt;&lt;td&gt;XIAO (7), 2.59 from the antenna&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;8.10&lt;/td&gt;&lt;td&gt;9.60&lt;/td&gt;&lt;td&gt;Board stops (front shell)&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;9.60&lt;/td&gt;&lt;td&gt;11.20&lt;/td&gt;&lt;td&gt;Main board (6)&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;11.70&lt;/td&gt;&lt;td&gt;17.70&lt;/td&gt;&lt;td&gt;Battery (9)&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;17.70&lt;/td&gt;&lt;td&gt;18.70&lt;/td&gt;&lt;td&gt;PORON foam, compressed&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;18.70&lt;/td&gt;&lt;td&gt;39.00&lt;/td&gt;&lt;td&gt;Free space (20.3 mm), crossed by the 4 posts&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;29.30&lt;/td&gt;&lt;td&gt;36.00&lt;/td&gt;&lt;td&gt;Back-shell snaps&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;36.00&lt;/td&gt;&lt;td&gt;41.00&lt;/td&gt;&lt;td&gt;Back shell (10), floor from 39 to 41&lt;/td&gt;&lt;/tr&gt;
+      ">
         <tr><td>0,00</td><td>1,00</td><td>Vitre (1)</td></tr>
-        <tr><td>1,00</td><td>2,40</td><td>Écran OLED (5), collé à la vitre, dans l'ouverture du rebord</td></tr>
-        <tr><td>2,40</td><td>2,70</td><td>Antenne + ferrite (2)</td></tr>
-        <tr><td>2,80</td><td>4,00</td><td>Châssis (6)</td></tr>
-        <tr><td>5,29</td><td>9,50</td><td>XIAO (8), jeu de 1,29 avec le châssis</td></tr>
-        <tr><td>9,60</td><td>11,20</td><td>Carte mère (7)</td></tr>
-        <tr><td>11,70</td><td>17,70</td><td>Batterie (10)</td></tr>
-        <tr><td>17,70</td><td>39,00</td><td>Volume libre (21,3 mm)</td></tr>
-        <tr><td>32,00</td><td>39,00</td><td>Bossages de vis (±14 mm)</td></tr>
-        <tr><td>36,00</td><td>41,00</td><td>Coque arrière (11), fond de 39 à 41</td></tr>
+        <tr><td>1,00</td><td>1,17</td><td>Adhésif 3M 9495LE, sur le rebord</td></tr>
+        <tr><td>1,00</td><td>2,40</td><td>Écran OLED (5), laminé à la vitre, dans l'ouverture du rebord</td></tr>
+        <tr><td>2,40</td><td>2,70</td><td>Antenne + ferrite (2), collée au dos de l'écran</td></tr>
+        <tr><td>5,29</td><td>9,50</td><td>XIAO (7), à 2,59 de l'antenne</td></tr>
+        <tr><td>8,10</td><td>9,60</td><td>Butées de la carte (coque avant)</td></tr>
+        <tr><td>9,60</td><td>11,20</td><td>Carte mère (6)</td></tr>
+        <tr><td>11,70</td><td>17,70</td><td>Batterie (9)</td></tr>
+        <tr><td>17,70</td><td>18,70</td><td>Mousse PORON, comprimée</td></tr>
+        <tr><td>18,70</td><td>39,00</td><td>Volume libre (20,3 mm), traversé par les 4 colonnettes</td></tr>
+        <tr><td>29,30</td><td>36,00</td><td>Clips de la coque arrière</td></tr>
+        <tr><td>36,00</td><td>41,00</td><td>Coque arrière (10), fond de 39 à 41</td></tr>
       </tbody>
     </table>
     </div>
-    <p style="margin-top:12px">Centre de l'USB-C à 6,9 mm de la face avant. Jeux mini : écran / ouverture 0,20, châssis / antenne 0,10, carte mère / batterie 0,50.</p>
+    <p style="margin-top:12px"><span class="i18n" data-en="USB-C centre 6.9 mm from the front face. Minimum gaps: screen / opening 0.20, XIAO / antenna 2.59, main board / battery 0.50.">Centre de l'USB-C à 6,9 mm de la face avant. Jeux mini : écran / ouverture 0,20, XIAO / antenne 2,59, carte mère / batterie 0,50.</span></p>
   </div>
 
   <div class="sheet">
-    <span class="label">Électronique</span>
-    <h2>Brochage (XIAO ESP32S3)</h2>
-    <p class="lede">Correspondance broches / GPIO tirée du wiki Seeed. L'écran et le NFC partagent le bus SPI.</p>
+    <span class="i18n" data-en="&lt;span class=&quot;label&quot;&gt;Electronics&lt;/span&gt;"><span class="label">Électronique</span></span>
+    <span class="i18n" data-en="&lt;h2&gt;Pinout (XIAO ESP32S3)&lt;/h2&gt;"><h2>Brochage (XIAO ESP32S3)</h2></span>
+    <p class="lede"><span class="i18n" data-en="Pin / GPIO mapping from the Seeed wiki. The screen and the NFC share the SPI bus.">Correspondance broches / GPIO tirée du wiki Seeed. L'écran et le NFC partagent le bus SPI.</span></p>
     <div class="tbl">
     <table>
-      <thead><tr><th>Broche</th><th>Signal</th><th>Vers</th></tr></thead>
-      <tbody class="mono">
+      <thead class="i18n" data-en="&lt;tr&gt;&lt;th&gt;Pin&lt;/th&gt;&lt;th&gt;Signal&lt;/th&gt;&lt;th&gt;To&lt;/th&gt;&lt;/tr&gt;"><tr><th>Broche</th><th>Signal</th><th>Vers</th></tr></thead>
+      <tbody class="i18n mono" data-en="
+        &lt;tr&gt;&lt;td&gt;D8 · GPIO7&lt;/td&gt;&lt;td&gt;SCK&lt;/td&gt;&lt;td&gt;screen + NFC&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D10 · GPIO9&lt;/td&gt;&lt;td&gt;MOSI&lt;/td&gt;&lt;td&gt;screen + NFC&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D9 · GPIO8&lt;/td&gt;&lt;td&gt;MISO&lt;/td&gt;&lt;td&gt;NFC&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D0 · GPIO1&lt;/td&gt;&lt;td&gt;Screen CS&lt;/td&gt;&lt;td&gt;screen&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D1 · GPIO2&lt;/td&gt;&lt;td&gt;DC&lt;/td&gt;&lt;td&gt;screen&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D2 · GPIO3&lt;/td&gt;&lt;td&gt;RESET&lt;/td&gt;&lt;td&gt;screen&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D6 · GPIO43&lt;/td&gt;&lt;td&gt;Backlight (PWM)&lt;/td&gt;&lt;td&gt;IPS prototype; free with the OLED&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D3 · GPIO4&lt;/td&gt;&lt;td&gt;NFC CS&lt;/td&gt;&lt;td&gt;ST25R3916B&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D7 · GPIO44&lt;/td&gt;&lt;td&gt;NFC IRQ&lt;/td&gt;&lt;td&gt;ST25R3916B&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D5 · GPIO6&lt;/td&gt;&lt;td&gt;Battery voltage (ADC)&lt;/td&gt;&lt;td&gt;voltage divider&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;D4 · GPIO5&lt;/td&gt;&lt;td&gt;free&lt;/td&gt;&lt;td&gt;buzzer or vibration motor&lt;/td&gt;&lt;/tr&gt;
+      ">
         <tr><td>D8 · GPIO7</td><td>SCK</td><td>écran + NFC</td></tr>
         <tr><td>D10 · GPIO9</td><td>MOSI</td><td>écran + NFC</td></tr>
         <tr><td>D9 · GPIO8</td><td>MISO</td><td>NFC</td></tr>
@@ -219,38 +279,48 @@ a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
       </tbody>
     </table>
     </div>
-    <p style="margin-top:12px">Le ST25R3916B est alimenté par la batterie (2,4 à 5,5 V) et ses entrées/sorties en 3,3 V (plage 1,65 à 5,5 V). Seeed ne relie la batterie à aucune broche : le pont diviseur sur D5 est sur la carte mère.</p>
+    <p style="margin-top:12px"><span class="i18n" data-en="The ST25R3916B runs from the battery (2.4 to 5.5 V) with its I/O at 3.3 V (1.65 to 5.5 V range). Seeed does not wire the battery to any pin: the divider on D5 sits on the main board.">Le ST25R3916B est alimenté par la batterie (2,4 à 5,5 V) et ses entrées/sorties en 3,3 V (plage 1,65 à 5,5 V). Seeed ne relie la batterie à aucune broche : le pont diviseur sur D5 est sur la carte mère.</span></p>
   </div>
 </section>
 
 <section class="cols2">
   <div class="sheet">
-    <span class="label">Avant de lancer l'outillage</span>
-    <h2>Points à valider</h2>
-    <ol class="checks">
-      <li><b>Dalle sur mesure.</b> Envoyer le cahier des charges de l'écran (ligne 5) à des fabricants de dalles OLED : faisabilité de la nappe repliée, outillage, minimum de commande, délai.</li>
+    <span class="i18n" data-en="&lt;span class=&quot;label&quot;&gt;Before tooling&lt;/span&gt;"><span class="label">Avant de lancer l'outillage</span></span>
+    <span class="i18n" data-en="&lt;h2&gt;To validate&lt;/h2&gt;"><h2>Points à valider</h2></span>
+    <ol class="i18n checks" data-en="
+      &lt;li&gt;&lt;b&gt;Custom panel.&lt;/b&gt; Send the screen specification (row 5) to OLED panel makers: feasibility of the folded flex, 3.3 V SPI interface, tooling, minimum order, lead time.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;NFC range through the screen.&lt;/b&gt; Measure with a panel that has no metal on its back, glass in place. Target: 4 cm. Fallback: antenna on the back face.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Electronics.&lt;/b&gt; Main board schematic and layout (pinout and placement fixed), then firmware.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Mould.&lt;/b&gt; Draft, texture, gates inside, stripping of the 4 snap grooves (0.5 undercut).&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Battery and foam.&lt;/b&gt; Confirm the LP603030 length with its protection circuit (fits even at 34 mm) and the foam thickness.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Certifications.&lt;/b&gt; Radio (RED directive), battery transport (UN38.3); banking only for reading cards directly.&lt;/li&gt;
+    ">
+      <li><b>Dalle sur mesure.</b> Envoyer le cahier des charges de l'écran (ligne 5) à des fabricants de dalles OLED : faisabilité de la nappe repliée, liaison SPI 3,3 V, outillage, minimum de commande, délai.</li>
       <li><b>Portée NFC à travers l'écran.</b> Mesurer avec une dalle sans métal au dos, vitre en place. Objectif : 4 cm. Repli : antenne sur la face arrière.</li>
-      <li><b>Écran du prototype.</b> Datasheet ER-TFT1.54-1 à récupérer à la main (le site BuyDisplay bloque le téléchargement automatique) : position de la zone active, broches, longueur de la nappe.</li>
-      <li><b>Batterie.</b> La fiche LP603030 ne précise pas si les 31 mm incluent le circuit de protection. Même à 34 mm, elle loge.</li>
-      <li><b>USB-C.</b> Vérifier l'enfichage d'un vrai câble sur une coque imprimée.</li>
-      <li><b>Autonomie.</b> Mesurer la consommation réelle. Les 21 mm libres permettent une batterie plus épaisse.</li>
+      <li><b>Électronique.</b> Schéma et routage de la carte mère (brochage et implantation fixés), puis logiciel.</li>
+      <li><b>Moule.</b> Dépouilles, texture, points d'injection à l'intérieur, extraction des 4 gorges de clips (contre-dépouille de 0,5).</li>
+      <li><b>Batterie et mousse.</b> Confirmer la longueur de la LP603030 avec son circuit de protection (même à 34 mm, elle loge) et l'épaisseur de la mousse.</li>
+      <li><b>Certifications.</b> Radio (directive RED), transport de la batterie (UN38.3) ; bancaires seulement pour la lecture directe des cartes.</li>
     </ol>
   </div>
 
   <div class="sheet">
-    <span class="label">Paiement</span>
-    <h2>Deux façons d'encaisser</h2>
-    <h3>A. Lien de paiement · réalisable tout de suite</h3>
-    <p>Le cube affiche un QR code et, en émulation de carte NFC-A, transmet le même lien au téléphone du client. Le client paie chez Stripe ou SumUp. Le cube ne voit jamais de numéro de carte : pas de certification bancaire.</p>
-    <h3>B. Lecture directe des cartes sans contact</h3>
-    <p>Le ST25R3916B est conforme EMVCo 3.1a pour la partie radio. Il faut en plus un logiciel de paiement certifié (noyau EMV L2) et une certification de sécurité PCI. Plusieurs mois avec un laboratoire agréé.</p>
+    <span class="i18n" data-en="&lt;span class=&quot;label&quot;&gt;Payment&lt;/span&gt;"><span class="label">Paiement</span></span>
+    <span class="i18n" data-en="&lt;h2&gt;Two ways to take payment&lt;/h2&gt;"><h2>Deux façons d'encaisser</h2></span>
+    <span class="i18n" data-en="&lt;h3&gt;A. Payment link · doable right away&lt;/h3&gt;"><h3>A. Lien de paiement · réalisable tout de suite</h3></span>
+    <p><span class="i18n" data-en="The cube shows a QR code and, in NFC-A card emulation, passes the same link to the customer&#x27;s phone. The customer pays through Stripe or SumUp. The cube never sees a card number: no banking certification needed.">Le cube affiche un QR code et, en émulation de carte NFC-A, transmet le même lien au téléphone du client. Le client paie chez Stripe ou SumUp. Le cube ne voit jamais de numéro de carte : pas de certification bancaire.</span></p>
+    <span class="i18n" data-en="&lt;h3&gt;B. Reading contactless cards directly&lt;/h3&gt;"><h3>B. Lecture directe des cartes sans contact</h3></span>
+    <p><span class="i18n" data-en="The ST25R3916B is EMVCo 3.1a compliant for the radio side. On top of that you need certified payment software (EMV L2 kernel) and PCI security certification. Several months with an accredited lab.">Le ST25R3916B est conforme EMVCo 3.1a pour la partie radio. Il faut en plus un logiciel de paiement certifié (noyau EMV L2) et une certification de sécurité PCI. Plusieurs mois avec un laboratoire agréé.</span></p>
   </div>
 </section>
 
 <section class="sheet">
-  <span class="label">Série</span>
-  <h2>Version de série (révision C)</h2>
-  <p>La XIAO est remplacée par ses composants, soudés sur la carte mère :
+  <span class="i18n" data-en="&lt;span class=&quot;label&quot;&gt;Production&lt;/span&gt;"><span class="label">Série</span></span>
+  <span class="i18n" data-en="&lt;h2&gt;Production version (revision C)&lt;/h2&gt;"><h2>Version de série (révision C)</h2></span>
+  <p class="i18n" data-en="The XIAO is replaced by its parts, soldered onto the main board:
+  &lt;span class=&quot;ref mono&quot;&gt;Espressif ESP32-S3-MINI-1-N8&lt;/span&gt; (15.4 × 20.5 × 2.4),
+  &lt;span class=&quot;ref mono&quot;&gt;GCT USB4105-GF-A&lt;/span&gt; (USB-C 2.0, 16 contacts),
+  &lt;span class=&quot;ref mono&quot;&gt;Microchip MCP73831T-2ACI/OT&lt;/span&gt; (SOT-23-5 charger up to 500 mA). Everything else stays the same.">La XIAO est remplacée par ses composants, soudés sur la carte mère :
   <span class="ref mono">Espressif ESP32-S3-MINI-1-N8</span> (15,4 × 20,5 × 2,4),
   <span class="ref mono">GCT USB4105-GF-A</span> (USB-C 2.0, 16 contacts),
   <span class="ref mono">Microchip MCP73831T-2ACI/OT</span> (chargeur SOT-23-5 jusqu'à 500 mA). Le reste ne change pas.</p>
@@ -259,14 +329,16 @@ a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
 <section class="sheet">
   <span class="label">Sources</span>
   <ul class="sources">
-    <li><a href="https://www.buydisplay.com/1-54-inch-tft-lcd-display-ips-panel-screen-240x240-for-smart-watch">BuyDisplay ER-TFT1.54-1</a></li>
+    <li><a href="https://www.buydisplay.com/catalog/product/view/id/1815/s/1-54-inch-tft-lcd-display-ips-panel-screen-240x240-for-smart-watch/">BuyDisplay ER-TFT1.54-1</a></li>
     <li><a href="https://www.buydisplay.com/download/manual/ER-TFT1.54-1_Datasheet.pdf">Datasheet ER-TFT1.54-1</a></li>
-    <li><a href="https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/">Seeed XIAO ESP32S3 (wiki, modèle 3D, brochage)</a></li>
+    <li><a href="https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/"><span class="i18n" data-en="Seeed XIAO ESP32S3 (wiki, 3D model, pinout)">Seeed XIAO ESP32S3 (wiki, modèle 3D, brochage)</span></a></li>
     <li><a href="https://www.st.com/resource/en/datasheet/st25r3916b.pdf">Datasheet ST25R3916B (DS13541)</a></li>
-    <li><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/ST25R3916B-AQWT/16516567">ST25R3916B-AQWT chez DigiKey</a></li>
+    <li><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/ST25R3916B-AQWT/16516567"><span class="i18n" data-en="ST25R3916B-AQWT at DigiKey">ST25R3916B-AQWT chez DigiKey</span></a></li>
     <li><a href="https://www.st.com/en/evaluation-tools/x-nucleo-nfc08a1.html">ST X-NUCLEO-NFC08A1</a></li>
-    <li><a href="https://www.lipobattery.us/lipo-battery-lp603030-3-7v-500mah-1-85wh-with-protection-circuit-and-wires-20mm/">Batterie LP603030</a></li>
-    <li><a href="https://us.rs-online.com/product/wurth-elektronik/364004/70996260/">Würth 364004</a></li>
+    <li><a href="https://www.lipobattery.us/lipo-battery-lp603030-3-7v-500mah-1-85wh-with-protection-circuit-and-wires-20mm/"<span class="i18n" data-en="&gt;LP603030 battery&lt;/a&gt;">>Batterie LP603030</a></span></li>
+    <li><a href="https://www.we-online.com/components/products/datasheet/364004.pdf">Würth 364004 (datasheet)</a></li>
+    <li><a href="https://multimedia.3m.com/mws/media/2366195O/3m-double-coated-tape-9495le.pdf">3M 9495LE (datasheet)</a></li>
+    <li><a href="https://www.rogerscorp.com/Elastomeric%20Material%20Solutions/PORON%20Industrial%20Polyurethanes/PORON%204701%2030">Rogers PORON 4701-30</a></li>
     <li><a href="https://documentation.espressif.com/esp32-s3-mini-1_mini-1u_datasheet_en.pdf">ESP32-S3-MINI-1 (datasheet)</a></li>
     <li><a href="https://gct.co/connector/usb4105">GCT USB4105</a></li>
   </ul>
@@ -277,22 +349,25 @@ a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
 <script>
 (function () {
   const f = (n) => Math.round(n * 100) / 100;
+  const tr = (fr, en) => document.documentElement.lang === "en" ? en : fr;
+  const D = (t) => document.documentElement.lang === "en" ? String(t).replace(/(\d),(\d)/g, "$1.$2") : t;
   const EYE = ["..XXXX..", ".XXXXXX.", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX.."];
   function dimH(x1, x2, y, text, ext1, ext2) {
     let s = `<line x1="${x1}" y1="${ext1}" x2="${x1}" y2="${y + 4}" stroke="var(--dim)" stroke-width="0.6"/><line x1="${x2}" y1="${ext2}" x2="${x2}" y2="${y + 4}" stroke="var(--dim)" stroke-width="0.6"/>`;
     s += `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--dim)" stroke-width="0.8" marker-start="url(#ar)" marker-end="url(#ar)"/>`;
-    s += `<text class="dimt" x="${(x1 + x2) / 2}" y="${y - 5}" text-anchor="middle">${text}</text>`;
+    s += `<text class="dimt" x="${(x1 + x2) / 2}" y="${y - 5}" text-anchor="middle">${D(text)}</text>`;
     return s;
   }
   function dimV(y1, y2, x, text, ext1, ext2) {
     let s = `<line x1="${ext1}" y1="${y1}" x2="${x + 4}" y2="${y1}" stroke="var(--dim)" stroke-width="0.6"/><line x1="${ext2}" y1="${y2}" x2="${x + 4}" y2="${y2}" stroke="var(--dim)" stroke-width="0.6"/>`;
     s += `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="var(--dim)" stroke-width="0.8" marker-start="url(#ar)" marker-end="url(#ar)"/>`;
-    s += `<text class="dimt" x="${x + 7}" y="${(y1 + y2) / 2 + 4}">${text}</text>`;
+    s += `<text class="dimt" x="${x + 7}" y="${(y1 + y2) / 2 + 4}">${D(text)}</text>`;
     return s;
   }
   const defs = `<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" style="fill:var(--dim)"/></marker>
     <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" style="fill:var(--abs)"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--paper)" stroke-opacity="0.35" stroke-width="1.2"/></pattern></defs>`;
 
+  function drawViews() {
   /* ---------- Face avant ---------- */
   (function () {
     const k = 7, ox = 40, oy = 70, X = (mm) => ox + (mm + 20.5) * k, Yv = (mm) => oy + (20.5 - mm) * k;
@@ -306,14 +381,14 @@ a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
       if (c === "X") s += `<rect x="${X((ex + (j - 3.5) * 1.05) * q - 0.475 * q)}" y="${Yv((-1 + (3.5 - i) * 1.05) * q + 0.475 * q)}" width="${0.95 * q * k}" height="${0.95 * q * k}" style="fill:var(--pix)"/>`;
     })));
     s += dimH(X(-20.5), X(20.5), Yv(-20.5) + 34, "41", Yv(-20.5) + 4, Yv(-20.5) + 4);
-    s += dimH(X(-18.5), X(18.5), Yv(-20.5) + 16, "37 vitre", Yv(-18.5) + 2, Yv(-18.5) + 2);
+    s += dimH(X(-18.5), X(18.5), Yv(-20.5) + 16, tr("37 vitre", "37 glass"), Yv(-18.5) + 2, Yv(-18.5) + 2);
     s += dimV(Yv(16.8), Yv(-16.8), X(20.5) + 22, "33,6", X(16.8) + 2, X(16.8) + 2);
     s += dimV(Yv(20.5), Yv(18.5), X(-20.5) - 18, "2", X(-20.5) - 2, X(-18.5) - 2);
     s += `<line x1="${X(0)}" y1="${Yv(20.5) - 12}" x2="${X(0)}" y2="${Yv(-20.5) + 8}" stroke="var(--dim)" stroke-width="0.8" stroke-dasharray="10 3 2 3"/>`;
     s += `<text class="dimt" x="${X(0) + 6}" y="${Yv(-20.5) + 4}" style="font-weight:500">A</text>`;
-    s += `<text class="lbl-s" x="${X(10)}" y="${Yv(26)}">2 trous Ø1,8, entraxe 8</text>`;
+    s += `<text class="lbl-s" x="${X(10)}" y="${Yv(26)}">${tr("2 trous Ø1,8, entraxe 8", "2 holes Ø1.8, 8 mm apart")}</text>`;
     const top = Yv(58), vbW = X(20.5) + 70, vbH = Yv(-20.5) + 50 - top;
-    document.getElementById("front").innerHTML = `<svg viewBox="0 ${top} ${vbW} ${vbH}" role="img" aria-label="Face avant cotée">${s}</svg>`;
+    document.getElementById("front").innerHTML = `<svg viewBox="0 ${top} ${vbW} ${vbH}" role="img" aria-label="${tr("Face avant cotée", "Dimensioned front view")}">${s}</svg>`;
   })();
 
   /* ---------- Coupe A-A ---------- */
@@ -326,24 +401,24 @@ a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
     let s = defs + `<clipPath id="cubeclip"><path d="${outline}"/></clipPath>`;
     // dragonne et manchons (hors plan, x = ±4)
     s += `<path d="M${X(19.6)},${Yv(20.5)} C${X(19.6)},${Yv(30)} ${X(21.4)},${Yv(30)} ${X(21.4)},${Yv(20.5)}" fill="none" stroke="var(--cable)" stroke-width="4"/>`;
-    s += r(18.75, 22.25, 14.5, 18.5, "none", 'stroke-dasharray="2 2"');
+    s += r(18.75, 22.25, 16.0, 18.5, "none", 'stroke-dasharray="2 2"');
     // coque
     let g = "";
     g += r(0, 41, 18.5, 20.5, "url(#hatch)");
     g += poly([[0, -18.5], [4.0, -18.5], [4.0, -19.5], [5.1, -19.5], [5.1, -20.5], [0, -20.5]], "url(#hatch)");
-    g += poly([[8.7, -20.5], [8.7, -19.5], [11.0, -19.5], [11.0, -18.5], [41, -18.5], [41, -20.5]], "url(#hatch)");
-    g += r(1.0, 2.0, -18.5, -17.8, "url(#hatch)");
+    g += poly([[8.7, -20.5], [8.7, -19.5], [36, -19.5], [36, -18.5], [41, -18.5], [41, -20.5]], "url(#hatch)");
+    g += r(1.17, 2.0, -18.5, -17.8, "url(#hatch)");
     s += `<g clip-path="url(#cubeclip)">${g}</g>`;
     s += `<g clip-path="url(#cubeclip)">${r(39, 41, -18.5, 18.5, "url(#hatch)")}</g>`;
     s += `<path d="${outline}" fill="none" stroke="var(--ink)" stroke-width="1"/>`;
-    // plan de joint coque avant / coque arrière, bossages (hors plan)
+    // plan de joint coque avant / coque arrière, colonnettes (hors plan, x = ±8)
     s += `<line x1="${X(36)}" y1="${Yv(20.5) - 6}" x2="${X(36)}" y2="${Yv(18.5)}" stroke="var(--dim)" stroke-width="1"/><line x1="${X(36)}" y1="${Yv(-18.5)}" x2="${X(36)}" y2="${Yv(-20.5) + 6}" stroke="var(--dim)" stroke-width="1"/>`;
-    s += r(32, 39, 11.75, 16.25, "none", 'stroke-dasharray="3 2"') + r(32, 39, -16.25, -11.75, "none", 'stroke-dasharray="3 2"');
-    // empilage (valeurs de check_fit.py)
+    s += r(18.7, 39, 5, 9, "none", 'stroke-dasharray="3 2"') + r(18.7, 39, -11, -7, "none", 'stroke-dasharray="3 2"');
+    // empilage (valeurs de production/build_cad.py)
     s += r(0, 1.0, -18.5, 18.5, "var(--glass)");
+    s += r(1.0, 1.17, -18.5, -17.85, "var(--foam)");
     s += r(1.0, 2.4, -17.6, 18.3, "var(--lcd)");
     s += r(2.4, 2.7, 15.5, 17.5, "var(--copper)") + r(2.4, 2.7, -17.5, -15.5, "var(--copper)");
-    s += r(2.8, 4.0, -18.3, 16.9, "var(--chassis)");
     // nappe écran (dans le plan, x = ±6)
     s += r(2.4, 8.2, 18.1, 18.3, "var(--copper)") + r(8.2, 8.4, 15.5, 18.3, "var(--copper)");
     s += r(8.4, 9.6, 11.5, 15.5, "var(--chip)");
@@ -353,26 +428,26 @@ a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
     s += r(5.29, 9.5, -19.33, -12.03, "var(--metal)");
     s += r(6.54, 7.24, -18.63, -14.03, "var(--chip)");
     s += `<line x1="${X(6.89)}" y1="${Yv(-20.5) + 4}" x2="${X(6.89)}" y2="${Yv(-13)}" stroke="var(--dim)" stroke-width="0.5" stroke-dasharray="4 2 1 2"/>`;
-    s += r(9.6, 11.2, -18.0, 17.5, "var(--pcb)");
-    s += r(11.2, 11.7, 14.5, 17.0, "var(--copper)");
+    s += r(9.6, 11.2, -18.0, 15.8, "var(--pcb)");
+    s += r(11.2, 11.7, 14.5, 15.6, "var(--copper)");
     s += r(11.7, 17.7, -16.5, 14.5, "var(--batt)");
+    s += r(17.7, 18.7, -14.5, 12.5, "var(--foam)");
     const tag = (n, d, y, tx, ty) => `<line x1="${X(d)}" y1="${Yv(y)}" x2="${tx}" y2="${ty}" stroke="var(--ink-2)" stroke-width="0.6"/><circle cx="${tx}" cy="${ty}" r="8" style="fill:var(--sheet)" stroke="var(--ink)" stroke-width="0.8"/><text class="num" x="${tx}" y="${ty + 3.6}" text-anchor="middle">${n}</text>`;
     s += tag(1, 0.5, 8, X(-4), Yv(8));
     s += tag(5, 1.7, 4, X(-4), Yv(1));
     s += tag(2, 2.55, -16.5, X(-4), Yv(-12));
-    s += tag(6, 3.4, -6, X(-4), Yv(-6));
-    s += tag(8, 7.4, -15, X(14), Yv(-27));
-    s += tag(7, 10.4, -8, X(24), Yv(-6));
-    s += tag(10, 14.7, 2, X(24), Yv(2));
-    s += tag(11, 40, 5, X(46), Yv(5));
+    s += tag(7, 7.4, -15, X(14), Yv(-27));
+    s += tag(6, 10.4, -8, X(24), Yv(-6));
+    s += tag(9, 14.7, 2, X(24), Yv(2));
+    s += tag(10, 40, 5, X(46), Yv(5));
     s += tag(4, 21.4, 26, X(28), Yv(28));
     s += tag(3, 30, 19.5, X(34), Yv(25));
     s += dimH(X(0), X(41), Yv(-20.5) + 40, "41", Yv(-20.5) + 4, Yv(-20.5) + 4);
     s += dimH(X(0), X(6.89), Yv(-20.5) + 20, "6,9", Yv(-20.5) + 2, Yv(-20.5) + 2);
     s += dimV(Yv(16.8), Yv(-16.8), X(41) + 30, "33,6 image", X(2.4) + 2, X(2.4) + 2);
-    s += `<text class="lbl-s" x="${X(0)}" y="${Yv(-20.5) + 62}">COUPE A-A · avant à gauche</text>`;
+    s += `<text class="lbl-s" x="${X(0)}" y="${Yv(-20.5) + 62}">${tr("COUPE A-A · avant à gauche", "SECTION A-A · front on the left")}</text>`;
     const top = Yv(31), vbW = X(41) + 120, vbH = Yv(-20.5) + 70 - top;
-    document.getElementById("section").innerHTML = `<svg viewBox="0 ${top} ${vbW} ${vbH}" role="img" aria-label="Coupe A-A cotée">${s}</svg>`;
+    document.getElementById("section").innerHTML = `<svg viewBox="0 ${top} ${vbW} ${vbH}" role="img" aria-label="${tr("Coupe A-A cotée", "Dimensioned section A-A")}">${s}</svg>`;
   })();
 
   /* ---------- Dessous ---------- */
@@ -382,19 +457,50 @@ a:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
     const rf = 1.5 * k, rb = 4 * k, L = X(-20.5), Rr = X(20.5), Tp = Yv(0), Bt = Yv(41);
     s += `<path d="M${L + rf},${Tp} H${Rr - rf} A${rf},${rf} 0 0 1 ${Rr},${Tp + rf} V${Bt - rb} A${rb},${rb} 0 0 1 ${Rr - rb},${Bt} H${L + rb} A${rb},${rb} 0 0 1 ${L},${Bt - rb} V${Tp + rf} A${rf},${rf} 0 0 1 ${L + rf},${Tp} Z" style="fill:var(--abs)" stroke="var(--ink)" stroke-width="1"/>`;
     s += `<line x1="${L}" y1="${Yv(36)}" x2="${Rr}" y2="${Yv(36)}" stroke="var(--dim)" stroke-width="0.8" stroke-dasharray="5 3"/>`;
-    s += `<text class="lbl-s" x="${Rr + 8}" y="${Yv(36) + 4}">joint</text>`;
-    s += `<rect x="${X(-6.5)}" y="${Yv(4.0)}" width="${13 * k}" height="${7 * k}" rx="${0.8 * k}" fill="none" stroke="var(--ink-2)" stroke-width="0.7" stroke-dasharray="3 2"/>`;
+    s += `<text class="lbl-s" x="${Rr + 8}" y="${Yv(36) + 4}">${tr("joint", "parting line")}</text>`;
+    s += `<rect x="${X(-6.5)}" y="${Yv(4.0)}" width="${13 * k}" height="${32 * k}" rx="${0.8 * k}" fill="none" stroke="var(--ink-2)" stroke-width="0.7" stroke-dasharray="3 2"/>`;
     s += `<rect x="${X(-4.8)}" y="${Yv(5.1)}" width="${9.6 * k}" height="${3.6 * k}" rx="${1.8 * k}" style="fill:var(--glass)" stroke="var(--ink)" stroke-width="0.8"/>`;
     s += `<line x1="${X(-20.5)}" y1="${Yv(0)}" x2="${X(20.5)}" y2="${Yv(0)}" stroke="var(--ink)" stroke-width="2.5"/>`;
-    s += `<text class="lbl-s" x="${X(-20.5)}" y="${Yv(0) - 10}">face avant (écran)</text>`;
+    s += `<text class="lbl-s" x="${X(-20.5)}" y="${Yv(0) - 10}">${tr("face avant (écran)", "front face (screen)")}</text>`;
     s += dimH(X(-4.8), X(4.8), Yv(41) + 18, "9,6", Yv(8.7) + 2, Yv(8.7) + 2);
     s += dimV(Yv(5.1), Yv(8.7), X(20.5) + 20, "3,6", X(4.8) + 2, X(4.8) + 2);
     s += dimV(Yv(0), Yv(6.9), X(20.5) + 56, "6,9", X(20.5) + 2, X(6) + 2);
     s += `<line x1="${X(-6)}" y1="${Yv(6.9)}" x2="${X(6)}" y2="${Yv(6.9)}" stroke="var(--dim)" stroke-width="0.6" stroke-dasharray="6 2 1 2"/>`;
-    s += `<text class="lbl-s" x="${X(-20.5)}" y="${Yv(41) + 44}">USB-C de la XIAO · charge + programmation</text>`;
+    s += `<text class="lbl-s" x="${X(-20.5)}" y="${Yv(41) + 44}">${tr("USB-C de la XIAO · charge + programmation", "XIAO USB-C · charging + programming")}</text>`;
     const vbW = X(20.5) + 100, vbH = Yv(41) + 56;
-    document.getElementById("bottom").innerHTML = `<svg viewBox="0 0 ${vbW} ${vbH}" role="img" aria-label="Vue de dessous cotée">${s}</svg>`;
+    document.getElementById("bottom").innerHTML = `<svg viewBox="0 0 ${vbW} ${vbH}" role="img" aria-label="${tr("Vue de dessous cotée", "Dimensioned underside view")}">${s}</svg>`;
   })();
+  }
+  drawViews();
+  window.addEventListener("blocky:lang", drawViews);
+})();
+</script>
+<script>
+(function () {
+  const KEY = "blocky-lang", root = document.documentElement, titleFr = document.title;
+  const titleEn = (document.querySelector('meta[name="title-en"]') || {}).content || titleFr;
+  function apply(l) {
+    root.lang = l;
+    document.querySelectorAll(".i18n").forEach(el => {
+      if (el.dataset.fr === undefined) el.dataset.fr = el.innerHTML;
+      el.innerHTML = l === "en" ? el.dataset.en : el.dataset.fr;
+    });
+    document.querySelectorAll("[data-en-aria]").forEach(el => {
+      if (el.dataset.frAria === undefined) el.dataset.frAria = el.getAttribute("aria-label");
+      el.setAttribute("aria-label", l === "en" ? el.dataset.enAria : el.dataset.frAria);
+    });
+    document.title = l === "en" ? titleEn : titleFr;
+    document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.l === l)));
+    window.dispatchEvent(new Event("blocky:lang"));
+  }
+  let saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  const first = saved === "fr" || saved === "en" ? saved : ((navigator.language || "fr").toLowerCase().startsWith("fr") ? "fr" : "en");
+  document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => {
+    try { localStorage.setItem(KEY, b.dataset.l); } catch (e) {}
+    apply(b.dataset.l);
+  }));
+  apply(first);
 })();
 </script>
 
